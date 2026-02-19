@@ -1,0 +1,344 @@
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
+
+const EMPTY_FORM = { nome: '', grupo: 'Adulto', de_onde: '', convidado: false, provavel: false, confirmado: false, foi: false }
+const CAMPO_LABELS = { convidado: 'Convidado', provavel: 'Provável', confirmado: 'Confirmado', foi: 'Foi' }
+
+function fmt(v) { return v ? 'Sim' : 'Não' }
+
+function formatarDataHora(iso) {
+  const d = new Date(iso)
+  return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+}
+
+export default function TabLista() {
+  const [lista,    setLista]    = useState([])
+  const [logs,     setLogs]     = useState([])
+  const [loading,  setLoading]  = useState(true)
+  const [modal,    setModal]    = useState(false)
+  const [editando, setEditando] = useState(null)
+  const [form,     setForm]     = useState(EMPTY_FORM)
+  const [filtroGrupo,       setFiltroGrupo]       = useState('todos')
+  const [filtroStatus,      setFiltroStatus]      = useState('todos')
+  const [busca,             setBusca]             = useState('')
+  const [ultimaAtualizacao, setUltimaAtualizacao] = useState(null)
+  const [logAberto,         setLogAberto]         = useState(false)
+
+  /* ── Carga e real-time ── */
+  useEffect(() => {
+    carregar()
+    carregarLogs()
+    const ch = supabase
+      .channel('lista_rt')
+      .on('postgres_changes', { event: '*',    schema: 'public', table: 'convidados'     }, carregar)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'logs_convidados' }, carregarLogs)
+      .subscribe()
+    return () => supabase.removeChannel(ch)
+  }, [])
+
+  function carregar() {
+    supabase.from('convidados').select('*').order('ordem', { ascending: true })
+      .then(({ data }) => {
+        if (data) setLista(data)
+        setLoading(false)
+        setUltimaAtualizacao(new Date())
+      })
+  }
+
+  function carregarLogs() {
+    supabase.from('logs_convidados').select('*').order('created_at', { ascending: false }).limit(100)
+      .then(({ data }) => { if (data) setLogs(data) })
+  }
+
+  async function registrarLog(acao, nome, detalhes = '') {
+    await supabase.from('logs_convidados').insert({ acao, convidado_nome: nome, detalhes })
+  }
+
+  /* ── Stats ── */
+  const total        = lista.length
+  const nConvidado   = lista.filter(c => c.convidado).length
+  const nProvavel    = lista.filter(c => c.provavel && !c.confirmado).length
+  const nConfirmado  = lista.filter(c => c.confirmado).length
+  const nFoi         = lista.filter(c => c.foi).length
+  const nAdulto      = lista.filter(c => c.grupo === 'Adulto').length
+  const nAdolescente = lista.filter(c => c.grupo === 'Adolescente').length
+  const origens = ['Mãe', 'Pai', 'Amigos'].map(o => ({
+    label: o, count: lista.filter(c => c.de_onde === o).length,
+  }))
+  const nOutros = total - origens.reduce((s, o) => s + o.count, 0)
+
+  /* ── Filtro ── */
+  const filtrada = lista
+    .filter(c => filtroGrupo === 'todos' || c.grupo === filtroGrupo)
+    .filter(c => {
+      if (filtroStatus === 'convidado')  return c.convidado
+      if (filtroStatus === 'provavel')   return c.provavel && !c.confirmado
+      if (filtroStatus === 'confirmado') return c.confirmado
+      if (filtroStatus === 'foi')        return c.foi
+      return true
+    })
+    .filter(c => !busca || c.nome.toLowerCase().includes(busca.toLowerCase()))
+
+  /* ── CRUD ── */
+  async function salvar() {
+    if (!form.nome.trim()) return
+    if (editando) {
+      await supabase.from('convidados').update({
+        nome: form.nome, grupo: form.grupo, de_onde: form.de_onde,
+        convidado: form.convidado, provavel: form.provavel, confirmado: form.confirmado, foi: form.foi,
+      }).eq('id', editando.id)
+      const mudancas = []
+      if (form.nome       !== editando.nome)              mudancas.push(`Nome: "${editando.nome}" → "${form.nome}"`)
+      if (form.grupo      !== editando.grupo)             mudancas.push(`Grupo: ${editando.grupo} → ${form.grupo}`)
+      if (form.de_onde    !== (editando.de_onde || ''))   mudancas.push(`De onde: "${editando.de_onde || '—'}" → "${form.de_onde || '—'}"`)
+      if (form.convidado  !== editando.convidado)         mudancas.push(`Convidado: ${fmt(editando.convidado)} → ${fmt(form.convidado)}`)
+      if (form.provavel   !== editando.provavel)          mudancas.push(`Provável: ${fmt(editando.provavel)} → ${fmt(form.provavel)}`)
+      if (form.confirmado !== editando.confirmado)        mudancas.push(`Confirmado: ${fmt(editando.confirmado)} → ${fmt(form.confirmado)}`)
+      if (form.foi        !== editando.foi)               mudancas.push(`Foi: ${fmt(editando.foi)} → ${fmt(form.foi)}`)
+      if (mudancas.length) await registrarLog('Editou', editando.nome, mudancas.join(' · '))
+    } else {
+      const maxOrdem = lista.reduce((m, c) => Math.max(m, c.ordem || 0), 0)
+      await supabase.from('convidados').insert({ ...form, ordem: maxOrdem + 1 })
+      await registrarLog('Adicionou', form.nome, `${form.grupo}${form.de_onde ? ' · ' + form.de_onde : ''}`)
+    }
+    setUltimaAtualizacao(new Date())
+    fechar()
+  }
+
+  async function excluir(id) {
+    const c = lista.find(x => x.id === id)
+    if (!window.confirm(`Excluir "${c?.nome}"?`)) return
+    await supabase.from('convidados').delete().eq('id', id)
+    await registrarLog('Excluiu', c?.nome || '?', `${c?.grupo}${c?.de_onde ? ' · ' + c.de_onde : ''}`)
+    setUltimaAtualizacao(new Date())
+  }
+
+  async function toggle(id, field) {
+    const c = lista.find(x => x.id === id)
+    const novoValor = !c[field]
+    await supabase.from('convidados').update({ [field]: novoValor }).eq('id', id)
+    await registrarLog(
+      novoValor ? 'Marcou' : 'Desmarcou',
+      c.nome,
+      `${CAMPO_LABELS[field]}: ${fmt(!novoValor)} → ${fmt(novoValor)}`
+    )
+    setUltimaAtualizacao(new Date())
+  }
+
+  function abrir(convidado = null) {
+    setEditando(convidado)
+    setForm(convidado ? {
+      nome: convidado.nome, grupo: convidado.grupo, de_onde: convidado.de_onde || '',
+      convidado: convidado.convidado, provavel: convidado.provavel, confirmado: convidado.confirmado, foi: convidado.foi,
+    } : EMPTY_FORM)
+    setModal(true)
+  }
+
+  function fechar() { setModal(false); setEditando(null); setForm(EMPTY_FORM) }
+
+  if (loading) return (
+    <div className="card" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-light)' }}>
+      Carregando lista...
+    </div>
+  )
+
+  return (
+    <>
+      {/* ── RESUMO ── */}
+      <div className="card">
+        <div className="lista-resumo-header">
+          <h3 className="card-title" style={{ marginBottom: 0 }}>👥 Lista de Convidados</h3>
+          {ultimaAtualizacao && (
+            <span className="lista-ultima-atualizacao">
+              Atualizado {ultimaAtualizacao.toLocaleDateString('pt-BR')} às{' '}
+              {ultimaAtualizacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+        </div>
+
+        <div className="lista-stats-grid lista-stats-5">
+          <div className="lista-stat"><span className="lista-stat-num">{total}</span><span className="lista-stat-label">Total</span></div>
+          <div className="lista-stat"><span className="lista-stat-num" style={{ color: 'var(--wine)' }}>{nConvidado}</span><span className="lista-stat-label">Convidado</span></div>
+          <div className="lista-stat"><span className="lista-stat-num warn">{nProvavel}</span><span className="lista-stat-label">Provável</span></div>
+          <div className="lista-stat"><span className="lista-stat-num success">{nConfirmado}</span><span className="lista-stat-label">Confirmado</span></div>
+          <div className="lista-stat"><span className="lista-stat-num info">{nFoi}</span><span className="lista-stat-label">Foi</span></div>
+        </div>
+
+        <div className="lista-grupo-grid">
+          <div className="lista-grupo-item">
+            <span className="lista-grupo-num">{nAdulto}</span>
+            <div><span className="lista-grupo-label">Adultos</span><span className="lista-grupo-pct">{total ? Math.round(nAdulto / total * 100) : 0}%</span></div>
+          </div>
+          <div className="lista-grupo-item">
+            <span className="lista-grupo-num">{nAdolescente}</span>
+            <div><span className="lista-grupo-label">Adolescentes</span><span className="lista-grupo-pct">{total ? Math.round(nAdolescente / total * 100) : 0}%</span></div>
+          </div>
+        </div>
+
+        <div className="lista-origem">
+          {origens.map(o => (
+            <div key={o.label} className="lista-origem-item">
+              <span className="lista-origem-label">{o.label}</span>
+              <span className="lista-origem-count">{o.count}</span>
+              <span className="lista-origem-pct">{total ? Math.round(o.count / total * 100) : 0}%</span>
+            </div>
+          ))}
+          <div className="lista-origem-item">
+            <span className="lista-origem-label">Outros</span>
+            <span className="lista-origem-count">{nOutros}</span>
+            <span className="lista-origem-pct">{total ? Math.round(nOutros / total * 100) : 0}%</span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── FILTROS ── */}
+      <div className="card" style={{ padding: '12px 14px' }}>
+        <input
+          className="lista-search"
+          type="text"
+          placeholder="🔍  Buscar convidado..."
+          value={busca}
+          onChange={e => setBusca(e.target.value)}
+        />
+        <div className="lista-filter-row">
+          <div className="filter-chips" style={{ marginBottom: 0, flexWrap: 'nowrap', overflowX: 'auto' }}>
+            {[['todos', 'Todos'], ['Adulto', 'Adultos'], ['Adolescente', 'Adolesc.']].map(([v, l]) => (
+              <button key={v} className={`chip ${filtroGrupo === v ? 'active' : ''}`} onClick={() => setFiltroGrupo(v)}>{l}</button>
+            ))}
+          </div>
+          <div className="filter-chips" style={{ marginBottom: 0, flexWrap: 'nowrap', overflowX: 'auto' }}>
+            {[['todos', 'Todos'], ['convidado', 'Convidado'], ['provavel', 'Provável'], ['confirmado', 'Confirm.'], ['foi', 'Foi']].map(([v, l]) => (
+              <button key={v} className={`chip ${filtroStatus === v ? 'active' : ''}`} onClick={() => setFiltroStatus(v)}>{l}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── LISTA ── */}
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="lista-table-header">
+          <span style={{ fontSize: '0.78rem', color: 'var(--text-light)' }}>
+            {filtrada.length} convidado{filtrada.length !== 1 ? 's' : ''}
+          </span>
+          <button className="lista-add-btn" onClick={() => abrir()}>+ Adicionar</button>
+        </div>
+
+        {filtrada.length === 0 ? (
+          <div style={{ padding: '28px', textAlign: 'center', color: 'var(--text-light)', fontSize: '0.85rem' }}>
+            Nenhum convidado encontrado.
+          </div>
+        ) : (
+          filtrada.map(c => (
+            <div key={c.id} className="lista-row">
+              <span className="lista-num">{lista.indexOf(c) + 1}</span>
+              <div className="lista-info">
+                <span className="lista-nome">{c.nome}</span>
+                <div className="lista-tags">
+                  <span className={`lista-tag ${c.grupo === 'Adulto' ? 'lista-tag-adulto' : 'lista-tag-adol'}`}>
+                    {c.grupo === 'Adulto' ? 'Adulto' : 'Adol.'}
+                  </span>
+                  {c.de_onde && <span className="lista-tag lista-tag-origem">{c.de_onde}</span>}
+                </div>
+              </div>
+              <div className="lista-flags">
+                <button className={`lista-flag ${c.convidado  ? 'flag-wine'    : ''}`} onClick={() => toggle(c.id, 'convidado')}  title="Convidado">Cv</button>
+                <button className={`lista-flag ${c.provavel   ? 'flag-warn'    : ''}`} onClick={() => toggle(c.id, 'provavel')}   title="Provável">P</button>
+                <button className={`lista-flag ${c.confirmado ? 'flag-success' : ''}`} onClick={() => toggle(c.id, 'confirmado')} title="Confirmado">C</button>
+                <button className={`lista-flag ${c.foi        ? 'flag-info'    : ''}`} onClick={() => toggle(c.id, 'foi')}        title="Foi">F</button>
+              </div>
+              <div className="lista-actions">
+                <button className="lista-action-btn" onClick={() => abrir(c)}>✏️</button>
+                <button className="lista-action-btn" onClick={() => excluir(c.id)}>🗑️</button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* ── LOG DE ALTERAÇÕES ── */}
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <button
+          className="log-toggle"
+          onClick={() => setLogAberto(v => !v)}
+        >
+          <span>📋 Log de Alterações <span className="log-count">{logs.length}</span></span>
+          <span className="log-arrow">{logAberto ? '▾' : '▸'}</span>
+        </button>
+
+        {logAberto && (
+          logs.length === 0 ? (
+            <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-light)', fontSize: '0.82rem' }}>
+              Nenhuma alteração registrada ainda.
+            </div>
+          ) : (
+            logs.map(log => (
+              <div key={log.id} className="log-entry">
+                <span className={`log-acao log-acao-${log.acao.toLowerCase()}`}>{log.acao}</span>
+                <div className="log-corpo">
+                  <span className="log-nome">{log.convidado_nome}</span>
+                  {log.detalhes && <span className="log-detalhes">{log.detalhes}</span>}
+                  <span className="log-data">{formatarDataHora(log.created_at)}</span>
+                </div>
+              </div>
+            ))
+          )
+        )}
+      </div>
+
+      {/* ── MODAL ── */}
+      {modal && (
+        <div className="modal-overlay" onClick={fechar}>
+          <div className="modal-box" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{editando ? 'Editar Convidado' : 'Novo Convidado'}</h3>
+              <button className="modal-close" onClick={fechar}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="modal-field">
+                <label className="modal-label">Nome</label>
+                <input className="modal-input" value={form.nome} onChange={e => setForm(f => ({ ...f, nome: e.target.value }))} placeholder="Nome do convidado" autoFocus />
+              </div>
+              <div className="modal-field">
+                <label className="modal-label">Grupo</label>
+                <div className="modal-radio-group">
+                  {['Adulto', 'Adolescente'].map(g => (
+                    <label key={g} className={`modal-radio ${form.grupo === g ? 'selected' : ''}`}>
+                      <input type="radio" name="grupo" checked={form.grupo === g} onChange={() => setForm(f => ({ ...f, grupo: g }))} />
+                      {g}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="modal-field">
+                <label className="modal-label">De Onde</label>
+                <select className="modal-input" value={form.de_onde} onChange={e => setForm(f => ({ ...f, de_onde: e.target.value }))}>
+                  <option value="">— não informado —</option>
+                  <option value="Mãe">Mãe</option>
+                  <option value="Pai">Pai</option>
+                  <option value="Amigos">Amigos</option>
+                  <option value="Outros">Outros</option>
+                </select>
+              </div>
+              <div className="modal-field">
+                <label className="modal-label">Status</label>
+                <div className="modal-checks">
+                  {[['convidado', 'Convidado'], ['provavel', 'Provável'], ['confirmado', 'Confirmado'], ['foi', 'Foi']].map(([field, label]) => (
+                    <label key={field} className="modal-check">
+                      <input type="checkbox" checked={form[field]} onChange={() => setForm(f => ({ ...f, [field]: !f[field] }))} />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="modal-btn-cancel" onClick={fechar}>Cancelar</button>
+              <button className="modal-btn-save" onClick={salvar}>Salvar</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
