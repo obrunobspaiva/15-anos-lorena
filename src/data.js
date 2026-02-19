@@ -132,13 +132,14 @@ export const CHECKLIST_GRUPOS = [
 ]
 
 /* ── PENDÊNCIAS ── */
+/* checkId vincula ao item correspondente do grupo "Por Fora" no checklist */
 export const PENDENCIAS = [
-  { id: 'pd1', titulo: 'Cerimonialista (Alan)',              prioridade: 'media', prazo: '30/04/2026', resp: 'Família', obs: 'Confirmar contrato com Alan' },
-  { id: 'pd2', titulo: 'DJ (Shalom)',                        prioridade: 'media', prazo: '30/04/2026', resp: 'Família', obs: 'Confirmar contrato com Shalom' },
-  { id: 'pd3', titulo: 'Banda',                              prioridade: 'alta',  prazo: '30/04/2026', resp: 'Família', obs: 'A definir — obter orçamentos' },
-  { id: 'pd4', titulo: 'Maquiador (make, cabelo, retoques)', prioridade: 'alta',  prazo: '28/05/2026', resp: 'Família', obs: 'A definir — incluir prova antes do evento' },
-  { id: 'pd5', titulo: 'Lembrancinhas',                      prioridade: 'media', prazo: '28/05/2026', resp: 'Família', obs: 'A definir' },
-  { id: 'pd6', titulo: 'Vestidos debutante (2 looks)',        prioridade: 'alta',  prazo: '30/04/2026', resp: 'Lorena',  obs: 'Look 1 entrada/cerimônia · Look 2 festa' },
+  { id: 'pd1', checkId: 'pf1', titulo: 'Cerimonialista (Alan)',              prioridade: 'media', prazo: '30/04/2026', resp: 'Família', obs: 'Confirmar contrato com Alan' },
+  { id: 'pd2', checkId: 'pf2', titulo: 'DJ (Shalom)',                        prioridade: 'media', prazo: '30/04/2026', resp: 'Família', obs: 'Confirmar contrato com Shalom' },
+  { id: 'pd3', checkId: 'pf3', titulo: 'Banda',                              prioridade: 'alta',  prazo: '30/04/2026', resp: 'Família', obs: 'A definir — obter orçamentos' },
+  { id: 'pd4', checkId: 'pf4', titulo: 'Maquiador (make, cabelo, retoques)', prioridade: 'alta',  prazo: '28/05/2026', resp: 'Família', obs: 'A definir — incluir prova antes do evento' },
+  { id: 'pd5', checkId: 'pf5', titulo: 'Lembrancinhas',                      prioridade: 'media', prazo: '28/05/2026', resp: 'Família', obs: 'A definir' },
+  { id: 'pd6', checkId: 'pf6', titulo: 'Vestidos debutante (3 looks)',        prioridade: 'alta',  prazo: '30/04/2026', resp: 'Lorena',  obs: 'Look 1 entrada/cerimônia · Look 2 festa · Look 3' },
 ]
 
 /* ── CHECKLIST PRÉ-CERIMÔNIA ── */

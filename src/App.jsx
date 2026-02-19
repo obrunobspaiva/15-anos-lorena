@@ -5,12 +5,14 @@ import TabInicio from './components/TabInicio'
 import TabChecklist from './components/TabChecklist'
 import TabCronograma from './components/TabCronograma'
 import TabLista from './components/TabLista'
+import TabChat from './components/TabChat'
 
 const TABS = {
   inicio:     <TabInicio />,
   checklist:  <TabChecklist />,
   cronograma: <TabCronograma />,
   lista:      <TabLista />,
+  chat:       <TabChat />,
 }
 
 export default function App() {

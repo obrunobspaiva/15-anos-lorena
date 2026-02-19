@@ -81,7 +81,14 @@ export function AppProvider({ children }) {
     })
   }, [])
 
-  const openPend = PENDENCIAS.filter(p => !pendState[p.id]).length
+  /* Pendência está aberta se o item correspondente do checklist (checkId) não foi marcado */
+  const porforaItens = CHECKLIST_GRUPOS.find(g => g.id === 'porfora')?.itens ?? []
+  function isPendOpen(p) {
+    const item = porforaItens.find(i => i.id === p.checkId)
+    if (!item) return !pendState[p.id]          // fallback
+    return !(item.fixo || !!checkState[item.id]) // segue o checklist
+  }
+  const openPend = PENDENCIAS.filter(isPendOpen).length
 
   /* ── Cerimônia checklist ── */
   const toggleCer = useCallback((id) => {
@@ -93,9 +100,9 @@ export function AppProvider({ children }) {
     })
   }, [])
 
-  /* ── Próxima pendência ── */
+  /* ── Próxima pendência (baseada no checkState / app_state) ── */
   const proximaPendencia = PENDENCIAS
-    .filter(p => !pendState[p.id])
+    .filter(isPendOpen)
     .map(p => {
       const [d, m, y] = p.prazo.split('/')
       return { ...p, dateObj: new Date(+y, +m - 1, +d) }

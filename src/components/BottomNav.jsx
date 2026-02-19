@@ -3,6 +3,7 @@ const NAV_ITEMS = [
   { id: 'checklist',  icon: '✅', label: 'Checklist' },
   { id: 'cronograma', icon: '📅', label: 'Cronograma' },
   { id: 'lista',      icon: '👥', label: 'Lista' },
+  { id: 'chat',       icon: '💬', label: 'Chat' },
 ]
 
 export default function BottomNav({ activeTab, onTabChange }) {

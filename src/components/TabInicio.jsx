@@ -1,5 +1,4 @@
 import { useApp } from '../AppContext'
-import { PENDENCIAS } from '../data'
 import Countdown from './Countdown'
 import Tag from './Tag'
 
@@ -7,9 +6,7 @@ const PRIORIDADE_LABEL = { alta: 'ALTA', media: 'MÉDIA', baixa: 'BAIXA' }
 const PRIORIDADE_TYPE  = { alta: 'danger', media: 'warn', baixa: 'info' }
 
 export default function TabInicio() {
-  const { progress, doneCheck, totalCheck, pendState, proximaPendencia } = useApp()
-
-  const openCount = PENDENCIAS.filter(p => !pendState[p.id]).length
+  const { progress, doneCheck, totalCheck, openPend, proximaPendencia } = useApp()
 
   return (
     <>
@@ -49,8 +46,8 @@ export default function TabInicio() {
             🎉 Todas as pendências concluídas!
           </p>
         )}
-        {openCount > 0 && (
-          <p className="note" style={{ marginTop: 8 }}>{openCount} pendência{openCount !== 1 ? 's' : ''} em aberto no total</p>
+        {openPend > 0 && (
+          <p className="note" style={{ marginTop: 8 }}>{openPend} pendência{openPend !== 1 ? 's' : ''} em aberto no total</p>
         )}
       </div>
 

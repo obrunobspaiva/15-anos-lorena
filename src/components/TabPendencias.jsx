@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useApp } from '../AppContext'
-import { PENDENCIAS } from '../data'
+import { PENDENCIAS, CHECKLIST_GRUPOS } from '../data'
 import Tag from './Tag'
 
 const FILTERS = [
@@ -15,13 +15,19 @@ const PRIO_TYPE  = { alta: 'danger', media: 'warn', baixa: 'info' }
 const PRIO_LABEL = { alta: 'ALTA',   media: 'MÉDIA', baixa: 'BAIXA' }
 
 export default function TabPendencias() {
-  const { pendState, togglePend, openPend } = useApp()
+  const { checkState, toggleCheck, openPend } = useApp()
+  const porforaItens = CHECKLIST_GRUPOS.find(g => g.id === 'porfora')?.itens ?? []
   const [filtro, setFiltro] = useState('todas')
 
+  function isDone(p) {
+    const item = porforaItens.find(i => i.id === p.checkId)
+    return item ? (item.fixo || !!checkState[item.id]) : false
+  }
+
   const filtered = PENDENCIAS.filter(p => {
-    if (filtro === 'concluida') return !!pendState[p.id]
-    if (filtro === 'todas')     return !pendState[p.id]
-    return p.prioridade === filtro && !pendState[p.id]
+    if (filtro === 'concluida') return isDone(p)
+    if (filtro === 'todas')     return !isDone(p)
+    return p.prioridade === filtro && !isDone(p)
   })
 
   const today = new Date()
@@ -50,7 +56,7 @@ export default function TabPendencias() {
         ))}
       </div>
 
-      {/* LISTA */}
+      {/* TABELA */}
       {filtered.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', color: 'var(--text-light)', fontSize: '0.85rem', padding: 24 }}>
           {filtro === 'concluida'
@@ -58,36 +64,57 @@ export default function TabPendencias() {
             : '✅ Nenhuma pendência nessa categoria!'}
         </div>
       ) : (
-        filtered.map(p => {
-          const done = !!pendState[p.id]
-          const dias = daysUntil(p.prazo)
-          return (
-            <div key={p.id} className={`pend-card ${done ? 'done' : ''}`}>
-              <input
-                type="checkbox"
-                checked={done}
-                onChange={() => togglePend(p.id)}
-              />
-              <div className="pend-body">
-                <div className={`pend-title ${done ? 'done-text' : ''}`}>{p.titulo}</div>
-                <div className="pend-meta">
-                  <Tag type={PRIO_TYPE[p.prioridade]}>{PRIO_LABEL[p.prioridade]}</Tag>
-                  <span>
-                    📅 {p.prazo}
-                    {!done && dias <= 30 && dias > 0 && (
-                      <span style={{ color: 'var(--danger)', fontWeight: 700 }}> ({dias}d)</span>
-                    )}
-                    {!done && dias <= 0 && (
-                      <span style={{ color: 'var(--danger)', fontWeight: 700 }}> HOJE</span>
-                    )}
-                  </span>
-                  <span>👤 {p.resp}</span>
-                </div>
-                {p.obs && <p className="note" style={{ marginTop: 5 }}>{p.obs}</p>}
-              </div>
-            </div>
-          )
-        })
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div className="table-scroll">
+            <table className="pend-table">
+              <thead>
+                <tr>
+                  <th className="pend-th pend-th-check"></th>
+                  <th className="pend-th">Tarefa</th>
+                  <th className="pend-th pend-th-center">Prioridade</th>
+                  <th className="pend-th pend-th-center">Prazo</th>
+                  <th className="pend-th pend-th-center">Resp.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(p => {
+                  const done = !!pendState[p.id]
+                  const dias = daysUntil(p.prazo)
+                  return (
+                    <tr
+                      key={p.id}
+                      className={`pend-tr ${done ? 'pend-tr-done' : ''}`}
+                      onClick={() => p.checkId && toggleCheck(p.checkId)}
+                    >
+                      <td className="pend-td pend-td-check">
+                        <span className={`pend-check ${done ? 'pend-check-done' : ''}`}>
+                          {done ? '✓' : ''}
+                        </span>
+                      </td>
+                      <td className="pend-td pend-td-task">
+                        <span className={done ? 'pend-task-done' : ''}>{p.titulo}</span>
+                        {p.obs && <span className="pend-obs">{p.obs}</span>}
+                      </td>
+                      <td className="pend-td pend-td-center">
+                        <Tag type={PRIO_TYPE[p.prioridade]}>{PRIO_LABEL[p.prioridade]}</Tag>
+                      </td>
+                      <td className="pend-td pend-td-center pend-td-prazo">
+                        {p.prazo}
+                        {!done && dias <= 30 && dias > 0 && (
+                          <span className="pend-dias-alert"> ({dias}d)</span>
+                        )}
+                        {!done && dias <= 0 && (
+                          <span className="pend-dias-alert"> HOJE</span>
+                        )}
+                      </td>
+                      <td className="pend-td pend-td-center">{p.resp}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
 
       {/* FORNECEDORES */}
