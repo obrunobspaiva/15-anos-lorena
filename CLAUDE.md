@@ -27,7 +27,7 @@ Single Page Application (SPA) built with React 18 + Vite. No external UI librari
 It also derives computed values consumed by multiple tabs: checklist progress %, open pending task count, and the next pending task.
 
 **Static data** — All event content lives in [src/data.js](src/data.js):
-- `EVENTO`: event metadata (date June 28, 2026; 150 guests; Mansão Adélia Prado, São Paulo)
+- `EVENTO`: event metadata (date June 28, 2026; 120 guests; Mansão Adélia Prado, São Paulo)
 - `BLOCOS`: 5 timeline blocks for the event schedule (16:00–22:00)
 - `CHECKLIST_GRUPOS`: 5 checklist groups with items and costs
 - `PENDENCIAS`: 16 tasks with priority, deadline, and responsible party

@@ -1,0 +1,16 @@
+name: Deploy → EasyPanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Trigger EasyPanel deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call deploy webhook
+        run: |
+          curl -sf -X GET \
+            "http://159.203.110.18:3000/api/deploy/f1b585d040dce3e9bc11c0b3d8304925c1d43e7faa450676"

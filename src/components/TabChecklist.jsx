@@ -36,6 +36,7 @@ export default function TabChecklist() {
                 <table className="porfora-table">
                   <thead>
                     <tr>
+                      <th className="porfora-th porfora-th-check"></th>
                       <th className="porfora-th">Serviço</th>
                       <th className="porfora-th porfora-th-status">Status</th>
                     </tr>
@@ -50,10 +51,15 @@ export default function TabChecklist() {
                           onClick={() => !item.fixo && toggleCheck(item.id)}
                           style={{ cursor: item.fixo ? 'default' : 'pointer' }}
                         >
+                          <td className="porfora-check-cell">
+                            <span className={`porfora-check ${isChecked ? 'porfora-check-done' : ''}`}>
+                              {isChecked ? '✓' : ''}
+                            </span>
+                          </td>
                           <td className="porfora-label">{item.label}</td>
                           <td className="porfora-status-cell">
                             <span className={`porfora-badge ${isChecked ? 'porfora-badge-ok' : 'porfora-badge-pend'}`}>
-                              {isChecked ? '✓ Definido' : 'A definir'}
+                              {isChecked ? 'Definido' : 'A definir'}
                             </span>
                           </td>
                         </tr>
@@ -63,23 +69,30 @@ export default function TabChecklist() {
                 </table>
               ) : (
                 /* ── Lista checkbox padrão ── */
-                grupo.itens.map(item => {
-                  const isChecked = item.fixo || !!checkState[item.id]
-                  return (
-                    <label
-                      key={item.id}
-                      className={`checklist-item ${isChecked ? 'checked' : ''}`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        disabled={item.fixo}
-                        onChange={() => !item.fixo && toggleCheck(item.id)}
-                      />
-                      <span className="checklist-item-label">{item.label}</span>
-                    </label>
-                  )
-                })
+                <table className="checklist-table">
+                  <tbody>
+                    {grupo.itens.map(item => {
+                      const isChecked = item.fixo || !!checkState[item.id]
+                      return (
+                        <tr
+                          key={item.id}
+                          className={`checklist-table-row ${isChecked ? 'checklist-table-row-ok' : ''}`}
+                          onClick={() => !item.fixo && toggleCheck(item.id)}
+                          style={{ cursor: item.fixo ? 'default' : 'pointer' }}
+                        >
+                          <td className="checklist-table-check-cell">
+                            <span className={`checklist-table-check ${isChecked ? 'checklist-table-check-done' : ''}`}>
+                              {isChecked ? '✓' : ''}
+                            </span>
+                          </td>
+                          <td className={`checklist-table-label ${isChecked ? 'checklist-table-label-done' : ''}`}>
+                            {item.label}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>

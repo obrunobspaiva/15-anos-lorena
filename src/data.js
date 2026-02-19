@@ -4,7 +4,7 @@ export const EVENTO = {
   data:      new Date(2026, 5, 28),
   dataTexto: '28 de junho de 2026',
   local:     'Mansão Adélia Prado, SP',
-  convidados: 150,
+  convidados: 120,
   duracao:   '6 horas',
 }
 
@@ -126,7 +126,7 @@ export const CHECKLIST_GRUPOS = [
       { id: 'pf3', label: 'Banda',                              fixo: false },
       { id: 'pf4', label: 'Maquiador (make, cabelo, retoques)', fixo: false },
       { id: 'pf5', label: 'Lembrancinhas',                      fixo: false },
-      { id: 'pf6', label: 'Vestidos debutante (2 looks)',       fixo: false },
+      { id: 'pf6', label: 'Vestidos debutante (3 looks)',       fixo: false },
     ],
   },
 ]

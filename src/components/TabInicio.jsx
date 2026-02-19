@@ -62,7 +62,7 @@ export default function TabInicio() {
             <tr><td>Data</td><td><strong>28/06/2026 (domingo)</strong></td></tr>
             <tr><td>Horário</td><td>19:00 às 01:00 (6 horas)</td></tr>
             <tr><td>Local</td><td>Mansão Adélia Prado, SP</td></tr>
-            <tr><td>Convidados</td><td>150 pessoas</td></tr>
+            <tr><td>Convidados</td><td>120 pessoas</td></tr>
             <tr><td>Crianças</td><td>Até 9 anos não contam; 10+ contam</td></tr>
           </tbody>
         </table>
