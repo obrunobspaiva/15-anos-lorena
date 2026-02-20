@@ -39,15 +39,18 @@ export default function TabInicio() {
                     📍 Google Maps
                   </a>
                 </span>
-                <span>
-                  <a
-                    href="https://www.instagram.com/mansaoadeliaprado/"
-                    target="_blank" rel="noopener noreferrer"
-                    className="map-btn map-btn-insta"
-                  >
-                    📸 @mansaoadeliaprado
-                  </a>
-                </span>
+              </td>
+            </tr>
+            <tr>
+              <td>Instagram</td>
+              <td>
+                <a
+                  href="https://www.instagram.com/mansaoadeliaprado/"
+                  target="_blank" rel="noopener noreferrer"
+                  className="map-btn map-btn-insta"
+                >
+                  📸 @mansaoadeliaprado
+                </a>
               </td>
             </tr>
             <tr><td>Crianças</td><td>Até 9 anos não contam; 10+ contam</td></tr>
