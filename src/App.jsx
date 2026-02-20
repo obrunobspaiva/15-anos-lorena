@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Header from './components/Header'
 import BottomNav from './components/BottomNav'
+import FlowerRain from './components/FlowerRain'
 import TabInicio from './components/TabInicio'
 import TabChecklist from './components/TabChecklist'
 import TabCronograma from './components/TabCronograma'
@@ -22,6 +23,7 @@ export default function App() {
 
   return (
     <>
+      <FlowerRain />
       <Header />
       <main className="app-main">
         <div key={activeTab} className="tab-section active">
