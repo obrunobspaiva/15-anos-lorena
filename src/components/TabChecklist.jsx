@@ -1,10 +1,15 @@
 import { useState } from 'react'
 import { useApp } from '../AppContext'
-import { CHECKLIST_GRUPOS } from '../data'
+import { CHECKLIST_GRUPOS, IDEIAS } from '../data'
 
 export default function TabChecklist() {
-  const { checkState, toggleCheck, doneCheck, totalCheck } = useApp()
+  const { checkState, toggleCheck, doneCheck, totalCheck, ideiaState, toggleIdeia } = useApp()
   const [openGroups, setOpenGroups] = useState({ porfora: true })
+  const [openIdeias, setOpenIdeias] = useState({})
+  const [ideiasSectionOpen, setIdeiasSectionOpen] = useState(true)
+
+  const toggleIdeiasSection = () => setIdeiasSectionOpen(prev => !prev)
+  const toggleIdeiaCard = (id) => setOpenIdeias(prev => ({ ...prev, [id]: !prev[id] }))
 
   const toggle = (id) => setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }))
 
@@ -98,6 +103,65 @@ export default function TabChecklist() {
           </div>
         )
       })}
+
+      {/* ── Seção Ideias & Extras ── */}
+      <div className={`checklist-group ${ideiasSectionOpen ? 'open' : ''}`}>
+        <div className="checklist-group-header" onClick={toggleIdeiasSection}>
+          <span className="checklist-group-title">💡 Ideias &amp; Extras</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="checklist-group-count">{IDEIAS.length} itens</span>
+            <span className="checklist-group-arrow">▸</span>
+          </span>
+        </div>
+
+        <div className="checklist-group-body">
+          {IDEIAS.map(ideia => {
+            const totalSub = ideia.subTarefas.length
+            const doneSub  = ideia.subTarefas.filter(s => !!ideiaState[s.id]).length
+            const isOpen   = !!openIdeias[ideia.id]
+
+            return (
+              <div key={ideia.id} className="ideia-card">
+                <div className="ideia-card-header" onClick={() => toggleIdeiaCard(ideia.id)}>
+                  <div className="ideia-card-title-row">
+                    <span className="ideia-status-emoji">{ideia.status}</span>
+                    <span className="ideia-label">{ideia.label}</span>
+                  </div>
+                  <div className="ideia-card-meta">
+                    <span className="ideia-badge-prazo">{ideia.prazo}</span>
+                    <span className="ideia-badge-sub">{doneSub}/{totalSub}</span>
+                    <span className={`ideia-arrow ${isOpen ? 'ideia-arrow-open' : ''}`}>▸</span>
+                  </div>
+                </div>
+
+                {isOpen && (
+                  <div className="ideia-card-body">
+                    <p className="ideia-descricao">{ideia.descricao}</p>
+                    <p className="ideia-custo">💰 {ideia.custo}</p>
+                    <ul className="ideia-subtarefas">
+                      {ideia.subTarefas.map(sub => {
+                        const done = !!ideiaState[sub.id]
+                        return (
+                          <li
+                            key={sub.id}
+                            className={`ideia-sub-item ${done ? 'ideia-sub-done' : ''}`}
+                            onClick={() => toggleIdeia(sub.id)}
+                          >
+                            <span className={`ideia-sub-check ${done ? 'ideia-sub-check-done' : ''}`}>
+                              {done ? '✓' : ''}
+                            </span>
+                            <span className="ideia-sub-label">{sub.label}</span>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
     </>
   )
 }

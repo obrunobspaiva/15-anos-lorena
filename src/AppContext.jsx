@@ -17,6 +17,7 @@ export function AppProvider({ children }) {
   const [checkState, setCheckState] = useState(() => load('lorena15_checklist', {}))
   const [pendState,  setPendState]  = useState(() => load('lorena15_pendencias', {}))
   const [cerState,   setCerState]   = useState(() => load('lorena15_cerimonia',  {}))
+  const [ideiaState, setIdeiaState] = useState(() => load('lorena15_ideias',     {}))
 
   /* ── Supabase: carga inicial + real-time ── */
   useEffect(() => {
@@ -24,13 +25,14 @@ export function AppProvider({ children }) {
     supabase
       .from('app_state')
       .select('id, data')
-      .in('id', ['checklist', 'pendencias', 'cerimonia'])
+      .in('id', ['checklist', 'pendencias', 'cerimonia', 'ideias'])
       .then(({ data, error }) => {
         if (error || !data) return
         data.forEach(row => {
           if (row.id === 'checklist') { setCheckState(row.data); save('lorena15_checklist', row.data) }
           if (row.id === 'pendencias') { setPendState(row.data);  save('lorena15_pendencias', row.data) }
           if (row.id === 'cerimonia')  { setCerState(row.data);   save('lorena15_cerimonia',  row.data) }
+          if (row.id === 'ideias')     { setIdeiaState(row.data); save('lorena15_ideias',     row.data) }
         })
       })
 
@@ -44,6 +46,7 @@ export function AppProvider({ children }) {
           if (row.id === 'checklist') { setCheckState(row.data); save('lorena15_checklist', row.data) }
           if (row.id === 'pendencias') { setPendState(row.data);  save('lorena15_pendencias', row.data) }
           if (row.id === 'cerimonia')  { setCerState(row.data);   save('lorena15_cerimonia',  row.data) }
+          if (row.id === 'ideias')     { setIdeiaState(row.data); save('lorena15_ideias',     row.data) }
         }
       )
       .subscribe()
@@ -90,6 +93,16 @@ export function AppProvider({ children }) {
   }
   const openPend = PENDENCIAS.filter(isPendOpen).length
 
+  /* ── Ideias & Extras ── */
+  const toggleIdeia = useCallback((id) => {
+    setIdeiaState(prev => {
+      const next = { ...prev, [id]: !prev[id] }
+      save('lorena15_ideias', next)
+      syncToSupabase('ideias', next)
+      return next
+    })
+  }, [])
+
   /* ── Cerimônia checklist ── */
   const toggleCer = useCallback((id) => {
     setCerState(prev => {
@@ -114,6 +127,7 @@ export function AppProvider({ children }) {
       checkState, toggleCheck, totalCheck, doneCheck, progress,
       pendState,  togglePend,  openPend,
       cerState,   toggleCer,
+      ideiaState, toggleIdeia,
       proximaPendencia,
     }}>
       {children}

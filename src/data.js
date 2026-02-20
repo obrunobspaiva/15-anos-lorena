@@ -142,6 +142,83 @@ export const PENDENCIAS = [
   { id: 'pd6', checkId: 'pf6', titulo: 'Vestidos debutante (3 looks)',        prioridade: 'alta',  prazo: '30/04/2026', resp: 'Lorena',  obs: 'Look 1 entrada/cerimônia · Look 2 festa · Look 3' },
 ]
 
+/* ── IDEIAS & EXTRAS ── */
+export const IDEIAS = [
+  {
+    id: 'idea1',
+    label: 'Robô de LED',
+    status: '⚠️',
+    statusLabel: 'A contratar',
+    descricao: 'Abertura da balada — robô surpresa com CO₂ e laser abrindo a pista de dança.',
+    prazo: 'mar/2026',
+    custo: 'R$ 1.200 – R$ 1.800',
+    subTarefas: [
+      { id: 'idea1_s1', label: 'Pedir orçamento nos 3 fornecedores (data 28/06/2026, Mansão Adélia)' },
+      { id: 'idea1_s2', label: 'Confirmar pé-direito do salão com a Mansão Adélia' },
+      { id: 'idea1_s3', label: 'Escolher fornecedor e fechar contrato' },
+      { id: 'idea1_s4', label: 'Alinhar com DJ o momento exato da entrada do robô' },
+      { id: 'idea1_s5', label: 'Confirmar personalização do peitoral "Lorena 15"' },
+      { id: 'idea1_s6', label: 'Pagamento (30% reserva + saldo até véspera)' },
+    ],
+  },
+  {
+    id: 'idea2',
+    label: 'Mural de Recados Digital',
+    status: '⚠️',
+    statusLabel: 'A definir',
+    descricao: 'QR Code nas mesas — convidados enviam mensagens/fotos em tempo real no telão.',
+    prazo: 'mai/2026',
+    custo: 'R$ 0 (DIY) ou R$ 150–300 (Cápsula do Tempo)',
+    subTarefas: [
+      { id: 'idea2_s1', label: 'Decidir entre DIY (app) ou Cápsula do Tempo (pronto)' },
+      { id: 'idea2_s2', label: 'Se DIY: desenvolver páginas /enviar, /mural e /admin' },
+      { id: 'idea2_s3', label: 'Se Cápsula do Tempo: contratar e configurar o evento' },
+      { id: 'idea2_s4', label: 'Criar design do QR Code (identidade visual da festa)' },
+      { id: 'idea2_s5', label: 'Imprimir QR Codes (1 por mesa + extras bar e recepção)' },
+      { id: 'idea2_s6', label: 'Testar integração com telão/projetor da Mansão Adélia' },
+      { id: 'idea2_s7', label: 'Alinhar com DJ/assessoria o momento de exibição no telão' },
+    ],
+  },
+  {
+    id: 'idea3',
+    label: 'Galeria Digital + Cartão QR',
+    status: '⚠️',
+    statusLabel: 'A produzir',
+    descricao: 'Cartãozinho lembrancinha com QR Code para galeria digital com todas as fotos da festa.',
+    prazo: 'jun/2026',
+    custo: 'R$ 80–150 (impressão dos cartões)',
+    subTarefas: [
+      { id: 'idea3_s1', label: 'Criar a página /galeria no app' },
+      { id: 'idea3_s2', label: 'Definir design do cartão (identidade visual da festa)' },
+      { id: 'idea3_s3', label: 'Aprovar layout com a Lorena' },
+      { id: 'idea3_s4', label: 'Imprimir cartões na gráfica (160 unidades)' },
+      { id: 'idea3_s5', label: 'Combinar com fotógrafo o upload das fotos pós-evento' },
+      { id: 'idea3_s6', label: 'Definir forma de distribuição dos cartões na festa' },
+    ],
+  },
+  {
+    id: 'idea4',
+    label: 'Vídeo-Carta',
+    status: '⚠️',
+    statusLabel: 'A produzir',
+    descricao: 'Vídeo compilado com mensagens de família e amigos, exibido na cerimônia. Surpresa!',
+    prazo: 'jun/2026 (edição até 21/06)',
+    custo: 'R$ 0 (produção DIY)',
+    subTarefas: [
+      { id: 'idea4_s1', label: 'Definir lista final de pessoas para gravar' },
+      { id: 'idea4_s2', label: 'Criar mensagem/convite com roteiro e instruções' },
+      { id: 'idea4_s3', label: 'Escolher forma de coleta (WhatsApp, app ou Drive)' },
+      { id: 'idea4_s4', label: 'Enviar convites para gravação (até 28/05/2026)' },
+      { id: 'idea4_s5', label: 'Cobrar retardatários (lembrete 1 semana antes do deadline)' },
+      { id: 'idea4_s6', label: 'Baixar e organizar todos os vídeos recebidos' },
+      { id: 'idea4_s7', label: 'Editar vídeo final com trilha e transições (5–8 min)' },
+      { id: 'idea4_s8', label: 'Revisar e aprovar versão final (sem mostrar à Lorena — surpresa)' },
+      { id: 'idea4_s9', label: 'Testar reprodução no projetor/telão da Mansão Adélia' },
+      { id: 'idea4_s10', label: 'Entregar arquivo final ao DJ/operador de vídeo da festa' },
+    ],
+  },
+]
+
 /* ── CHECKLIST PRÉ-CERIMÔNIA ── */
 export const CHECKLIST_CERIMONIA = [
   { id: 'cc1', label: 'Texto do MC revisado e aprovado pela família' },
