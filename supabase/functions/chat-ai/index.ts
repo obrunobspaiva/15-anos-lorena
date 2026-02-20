@@ -21,12 +21,10 @@ IMPORTANTE: Nunca use markdown nas respostas. Sem asteriscos, sem hashtags, sem 
 - **Crianças:** até 9 anos não contam; 10+ contam no total
 
 ## Cronograma
-- 19:00–19:30 → Recepção com DJ
-- 19:30–20:30 → Show da Banda (1ª Parte)
-- 20:30–21:30 → Cerimônia (violinista/orquestra, valsa, retrospectiva, troca de sapato, brinde)
-- 21:30–22:30 → Jantar com DJ (buffet, parabéns, bolo, doces)
-- 22:30–23:30 → Show da Banda (2ª Parte)
-- 23:30–01:00 → DJ Balada + Lorena Look 2 + gelo seco + fogos indoor + lembrancinhas + encerramento
+- 19:00–20:30 → Recepção com DJ (lounge/ambient) + Mural Digital ativo + Magic Mirror
+- 20:30–21:30 → Cerimônia: retrospectiva, Vídeo-Carta, entrada Lorena (Look 1) com o pai, valsa, entrega do anel, brinde, parabéns, bolo, fogos indoor
+- 21:30–22:45 → Jantar + Convívio: buffet, Cairo Bar, DJ ambiente, Mural Digital no telão
+- 22:45–01:00 → Balada: Robô de LED, Look 2 Lorena, coreografia amigas + robô, DJ set, galeria QR na saída
 
 ## Contratado (Rosmarino Buffet — Mansão Adélia Prado)
 - Buffet completo (Menu Rosmarino)
