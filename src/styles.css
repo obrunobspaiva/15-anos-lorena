@@ -66,6 +66,7 @@ body {
 }
 .header-title h1 { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px; line-height: 1.1; }
 .header-title p  { font-size: 0.72rem; opacity: 0.85; letter-spacing: 0.3px; }
+.header-name { font-size: 1.1rem !important; font-weight: 700; opacity: 1 !important; letter-spacing: 1px; color: var(--gold); }
 .header-icon { color: var(--gold-light); font-size: 0.85rem; }
 
 /* ── MAIN ── */

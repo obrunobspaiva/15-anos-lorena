@@ -13,7 +13,7 @@ export default function Header() {
             </div>
             <div>
               <h1>Festa 15 Anos</h1>
-              <p>Lorena · 28/06/2026</p>
+              <p className="header-name">Lorena</p>
             </div>
             <span className="header-icon">✦</span>
           </div>
