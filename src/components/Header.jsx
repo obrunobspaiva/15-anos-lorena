@@ -15,7 +15,7 @@ export default function Header() {
               <h1>Festa 15 Anos</h1>
               <p>Lorena · 28/06/2026</p>
             </div>
-            <span className="header-icon">✦</span>
+            <span className="header-icon">🌸</span>
           </div>
         </div>
       </header>
