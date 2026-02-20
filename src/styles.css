@@ -10,12 +10,12 @@
   --gold-dark:  #A8205A;
   --wine:       #1E3A6E;
   --wine-light: #4A7ABF;
-  --wine-pale:  #EEF0F8;
-  --bg:         #FDF0F6;
-  --card-bg:    #FEF0F7;
+  --wine-pale:  #ECEAF2;
+  --bg:         #ECEAF2;
+  --card-bg:    #F5F3F8;
   --text:       #1A2436;
   --text-light: #6A5A6A;
-  --border:     #EDD0E0;
+  --border:     #D8D0E4;
   --radius:     16px;
   --success:    #2E7D32;
   --success-bg: #E8F5E9;
@@ -38,8 +38,8 @@ body {
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
-  background-image: radial-gradient(circle at 20% 10%, rgba(212,64,122,0.06) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 90%, rgba(212,64,122,0.04) 0%, transparent 50%);
+  background-image: radial-gradient(circle at 20% 10%, rgba(200,196,220,0.4) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 90%, rgba(212,64,122,0.05) 0%, transparent 50%);
 }
 
 /* ── FLOWER RAIN ── */
