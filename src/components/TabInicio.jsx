@@ -37,7 +37,7 @@ export default function TabInicio({ onTabChange }) {
                 <span style={{ display: 'block', marginBottom: 6, fontSize: '0.8rem' }}>
                   Av. Alcântara Machado, 1705 — Mooca, SP
                 </span>
-                <span style={{ display: 'flex', gap: 6 }}>
+                <span style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
                   <a
                     href="https://waze.com/ul?q=Av.+Alcântara+Machado,+1705+Mooca+São+Paulo+SP"
                     target="_blank" rel="noopener noreferrer"
@@ -52,12 +52,14 @@ export default function TabInicio({ onTabChange }) {
                   >
                     📍 Google Maps
                   </a>
+                </span>
+                <span>
                   <a
                     href="https://www.instagram.com/mansaoadeliaprado/"
                     target="_blank" rel="noopener noreferrer"
                     className="map-btn map-btn-insta"
                   >
-                    📸 Instagram
+                    📸 @mansaoadeliaprado
                   </a>
                 </span>
               </td>
