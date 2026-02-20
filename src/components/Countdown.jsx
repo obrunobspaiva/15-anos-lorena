@@ -49,7 +49,6 @@ export default function Countdown() {
           </div>
         ))}
       </div>
-      <p className="countdown-date">28 de junho de 2026</p>
     </div>
   )
 }

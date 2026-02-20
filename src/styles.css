@@ -742,9 +742,11 @@ body {
 }
 .nav-btn.active::before { background: var(--wine); }
 .nav-icon  { font-size: 1.3rem; line-height: 1; }
+.nav-icon-svg { color: var(--text-light); transition: color 0.2s; }
 .nav-label { font-size: 0.62rem; font-weight: 600; color: var(--text-light); letter-spacing: 0.2px; }
 .nav-btn.active .nav-label { color: var(--wine); }
 .nav-btn.active .nav-icon  { filter: drop-shadow(0 1px 3px rgba(30,58,110,0.3)); }
+.nav-btn.active .nav-icon-svg { color: var(--wine); }
 
 /* ── SAFE AREA iOS ── */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {

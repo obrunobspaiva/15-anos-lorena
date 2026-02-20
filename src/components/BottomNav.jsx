@@ -1,9 +1,11 @@
+import { Home, ListChecks, Clock, Users, MessageCircle } from 'lucide-react'
+
 const NAV_ITEMS = [
-  { id: 'inicio',     icon: '🏠', label: 'Início' },
-  { id: 'checklist',  icon: '✅', label: 'Checklist' },
-  { id: 'cronograma', icon: '📅', label: 'Cronograma' },
-  { id: 'lista',      icon: '👥', label: 'Lista' },
-  { id: 'chat',       icon: '💬', label: 'Chat' },
+  { id: 'inicio',     Icon: Home,          label: 'Início' },
+  { id: 'checklist',  Icon: ListChecks,    label: 'Checklist' },
+  { id: 'cronograma', Icon: Clock,         label: 'Cronograma' },
+  { id: 'lista',      Icon: Users,         label: 'Lista' },
+  { id: 'chat',       Icon: MessageCircle, label: 'Chat' },
 ]
 
 export default function BottomNav({ activeTab, onTabChange }) {
@@ -15,7 +17,7 @@ export default function BottomNav({ activeTab, onTabChange }) {
           className={`nav-btn ${activeTab === item.id ? 'active' : ''}`}
           onClick={() => { onTabChange(item.id); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
         >
-          <span className="nav-icon">{item.icon}</span>
+          <item.Icon size={20} strokeWidth={1.8} className="nav-icon-svg" />
           <span className="nav-label">{item.label}</span>
         </button>
       ))}
