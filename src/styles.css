@@ -594,9 +594,10 @@ body {
 .porfora-th-status { text-align: right; width: 100px; }
 .porfora-row { border-bottom: 1px solid var(--border); transition: background 0.15s; }
 .porfora-row:last-child { border-bottom: none; }
-.porfora-ok      { background: var(--success-bg); }
-.porfora-pending { background: var(--warn-bg); }
+.porfora-ok       { background: var(--success-bg); }
+.porfora-pending  { background: var(--warn-bg); }
 .porfora-pending:active { background: #FFF0C0; }
+.porfora-canceled { background: #F5F5F5; opacity: 0.72; }
 .porfora-check-cell { width: 44px; padding: 10px 8px; text-align: center; }
 .porfora-check {
   display: inline-flex;
@@ -617,11 +618,18 @@ body {
   background: var(--success);
   color: #fff;
 }
-.porfora-label { font-size: 0.84rem; font-weight: 600; padding: 10px 14px; color: var(--text); }
-.porfora-status-cell { padding: 10px 14px; text-align: right; }
-.porfora-badge { font-size: 0.68rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
-.porfora-badge-ok   { background: var(--success-bg); color: var(--success); border: 1px solid var(--success); }
-.porfora-badge-pend { background: var(--warn-bg);    color: var(--warn);    border: 1px solid var(--warn); }
+.porfora-check-cancel {
+  border-color: #CCC;
+  background: #DDD;
+  color: #888;
+}
+.porfora-label          { font-size: 0.84rem; font-weight: 600; padding: 10px 14px; color: var(--text); }
+.porfora-label-canceled { text-decoration: line-through; color: #999; }
+.porfora-status-cell    { padding: 10px 14px; text-align: right; }
+.porfora-badge          { font-size: 0.68rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+.porfora-badge-ok       { background: var(--success-bg); color: var(--success); border: 1px solid var(--success); }
+.porfora-badge-pend     { background: var(--warn-bg);    color: var(--warn);    border: 1px solid var(--warn); }
+.porfora-badge-cancel   { background: #F0F0F0;           color: #888;           border: 1px solid #CCC; }
 
 /* ── TABELA CHECKLIST PADRÃO ── */
 .checklist-table { width: 100%; border-collapse: collapse; }

@@ -118,7 +118,7 @@ export const CHECKLIST_GRUPOS = [
     itens: [
       { id: 'pf1', label: 'Cerimonialista (Alan)',              fixo: true  },
       { id: 'pf2', label: 'DJ (Shalom)',                        fixo: true  },
-      { id: 'pf3', label: 'Banda',                              fixo: false },
+      { id: 'pf3', label: 'Banda',                              fixo: false, cancelado: true },
       { id: 'pf4', label: 'Maquiador (make, cabelo, retoques)', fixo: false },
       { id: 'pf5', label: 'Lembrancinhas',                      fixo: false },
       { id: 'pf6', label: 'Vestidos debutante (3 looks)',       fixo: false },

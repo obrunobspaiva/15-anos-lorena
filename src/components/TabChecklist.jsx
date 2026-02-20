@@ -48,23 +48,25 @@ export default function TabChecklist() {
                   </thead>
                   <tbody>
                     {grupo.itens.map(item => {
-                      const isChecked = item.fixo || !!checkState[item.id]
+                      const isCanceled = !!item.cancelado
+                      const isChecked  = item.fixo || (!isCanceled && !!checkState[item.id])
+                      const rowClass   = isCanceled ? 'porfora-canceled' : isChecked ? 'porfora-ok' : 'porfora-pending'
                       return (
                         <tr
                           key={item.id}
-                          className={`porfora-row ${isChecked ? 'porfora-ok' : 'porfora-pending'}`}
-                          onClick={() => !item.fixo && toggleCheck(item.id)}
-                          style={{ cursor: item.fixo ? 'default' : 'pointer' }}
+                          className={`porfora-row ${rowClass}`}
+                          onClick={() => !item.fixo && !isCanceled && toggleCheck(item.id)}
+                          style={{ cursor: (item.fixo || isCanceled) ? 'default' : 'pointer' }}
                         >
                           <td className="porfora-check-cell">
-                            <span className={`porfora-check ${isChecked ? 'porfora-check-done' : ''}`}>
-                              {isChecked ? '✓' : ''}
+                            <span className={`porfora-check ${isCanceled ? 'porfora-check-cancel' : isChecked ? 'porfora-check-done' : ''}`}>
+                              {isCanceled ? '✕' : isChecked ? '✓' : ''}
                             </span>
                           </td>
-                          <td className="porfora-label">{item.label}</td>
+                          <td className={`porfora-label ${isCanceled ? 'porfora-label-canceled' : ''}`}>{item.label}</td>
                           <td className="porfora-status-cell">
-                            <span className={`porfora-badge ${isChecked ? 'porfora-badge-ok' : 'porfora-badge-pend'}`}>
-                              {isChecked ? 'Definido' : 'A definir'}
+                            <span className={`porfora-badge ${isCanceled ? 'porfora-badge-cancel' : isChecked ? 'porfora-badge-ok' : 'porfora-badge-pend'}`}>
+                              {isCanceled ? 'Cancelado' : isChecked ? 'Definido' : 'A definir'}
                             </span>
                           </td>
                         </tr>

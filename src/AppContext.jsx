@@ -71,7 +71,7 @@ export function AppProvider({ children }) {
 
   const allItems   = CHECKLIST_GRUPOS.flatMap(g => g.itens)
   const totalCheck = allItems.length
-  const doneCheck  = allItems.filter(i => i.fixo || !!checkState[i.id]).length
+  const doneCheck  = allItems.filter(i => i.fixo || i.cancelado || !!checkState[i.id]).length
   const progress   = totalCheck ? Math.round((doneCheck / totalCheck) * 100) : 0
 
   /* ── Pendências ── */
@@ -89,7 +89,7 @@ export function AppProvider({ children }) {
   function isPendOpen(p) {
     const item = porforaItens.find(i => i.id === p.checkId)
     if (!item) return !pendState[p.id]          // fallback
-    return !(item.fixo || !!checkState[item.id]) // segue o checklist
+    return !(item.fixo || item.cancelado || !!checkState[item.id]) // segue o checklist
   }
   const openPend = PENDENCIAS.filter(isPendOpen).length
 
