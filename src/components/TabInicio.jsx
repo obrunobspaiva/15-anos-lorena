@@ -52,6 +52,13 @@ export default function TabInicio({ onTabChange }) {
                   >
                     📍 Google Maps
                   </a>
+                  <a
+                    href="https://www.instagram.com/mansaoadeliaprado/"
+                    target="_blank" rel="noopener noreferrer"
+                    className="map-btn map-btn-insta"
+                  >
+                    📸 Instagram
+                  </a>
                 </span>
               </td>
             </tr>

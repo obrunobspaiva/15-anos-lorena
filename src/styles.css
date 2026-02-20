@@ -187,6 +187,7 @@ body {
 .map-btn:active { opacity: 0.75; }
 .map-btn-waze  { background: #00AEFF; color: #fff; }
 .map-btn-gmaps { background: var(--wine); color: #fff; }
+.map-btn-insta { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff; }
 
 /* ── SECTION HEADER ── */
 .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
