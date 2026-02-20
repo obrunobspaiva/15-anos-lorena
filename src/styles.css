@@ -385,28 +385,6 @@ body {
   50% { border-color: rgba(212,64,122,0.4); }
 }
 
-/* ── JETBRAINS MONO — números/labels técnicos ── */
-.countdown-num,
-.countdown-unit,
-.countdown-label,
-.countdown-date,
-.badge,
-.tag,
-.fc-value,
-.fc-label,
-.finance-value,
-.finance-label,
-.progress-label,
-.pend-td-prazo,
-.pend-dias-alert,
-.lista-stat-num,
-.lista-stat-label,
-.lista-grupo-num,
-.lista-grupo-pct,
-.budget-input,
-.budget-prefix {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-}
 
 /* ── FINANCE CARDS (tab) ── */
 .finance-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; }
