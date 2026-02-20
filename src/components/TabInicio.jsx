@@ -1,12 +1,8 @@
 import { useApp } from '../AppContext'
 import Countdown from './Countdown'
-import Tag from './Tag'
 
-const PRIORIDADE_LABEL = { alta: 'ALTA', media: 'MÉDIA', baixa: 'BAIXA' }
-const PRIORIDADE_TYPE  = { alta: 'danger', media: 'warn', baixa: 'info' }
-
-export default function TabInicio() {
-  const { progress, doneCheck, totalCheck, openPend, proximaPendencia } = useApp()
+export default function TabInicio({ onTabChange }) {
+  const { progress, doneCheck, totalCheck } = useApp()
 
   return (
     <>
@@ -17,7 +13,7 @@ export default function TabInicio() {
       </div>
 
       {/* PROGRESSO DO CHECKLIST */}
-      <div className="card">
+      <div className="card card-clickable" onClick={() => onTabChange('checklist')}>
         <h3 className="card-title">✅ Progresso do Checklist</h3>
         <div className="progress-bar-wrap">
           <div className="progress-bar" style={{ width: `${progress}%` }} />
@@ -25,30 +21,6 @@ export default function TabInicio() {
         <p className="progress-label">
           {doneCheck} de {totalCheck} itens concluídos ({progress}%)
         </p>
-      </div>
-
-      {/* PRÓXIMA PENDÊNCIA */}
-      <div className="card">
-        <h3 className="card-title">⏰ Próxima Pendência</h3>
-        {proximaPendencia ? (
-          <div className="proxima-item">
-            <span className="proxima-title">{proximaPendencia.titulo}</span>
-            <div className="proxima-meta">
-              <Tag type={PRIORIDADE_TYPE[proximaPendencia.prioridade]}>
-                {PRIORIDADE_LABEL[proximaPendencia.prioridade]}
-              </Tag>
-              <span>📅 {proximaPendencia.prazo}</span>
-              <span>👤 {proximaPendencia.resp}</span>
-            </div>
-          </div>
-        ) : (
-          <p style={{ color: 'var(--success)', fontWeight: 700, textAlign: 'center' }}>
-            🎉 Todas as pendências concluídas!
-          </p>
-        )}
-        {openPend > 0 && (
-          <p className="note" style={{ marginTop: 8 }}>{openPend} pendência{openPend !== 1 ? 's' : ''} em aberto no total</p>
-        )}
       </div>
 
       {/* DADOS DO EVENTO */}

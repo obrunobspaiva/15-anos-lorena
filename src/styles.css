@@ -95,6 +95,8 @@ body {
 }
 .card-title    { font-size: 0.95rem; font-weight: 700; color: var(--wine); margin-bottom: 10px; }
 .card-subtitle { font-size: 0.78rem; color: var(--text-light); margin-bottom: 8px; }
+.card-clickable { cursor: pointer; transition: box-shadow 0.15s, transform 0.1s; }
+.card-clickable:active { transform: scale(0.98); box-shadow: none; }
 
 /* ── HEADER AVATAR ── */
 .header-avatar-wrap {
