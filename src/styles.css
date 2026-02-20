@@ -5,9 +5,9 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --gold:       #C8956C;
-  --gold-light: #F0D5BE;
-  --gold-dark:  #A67550;
+  --gold:       #D4407A;
+  --gold-light: #F8C8DC;
+  --gold-dark:  #A8205A;
   --wine:       #1E3A6E;
   --wine-light: #4A7ABF;
   --wine-pale:  #E8EFF8;
