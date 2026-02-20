@@ -8,6 +8,7 @@ import TabLista from './components/TabLista'
 import TabChat from './components/TabChat'
 
 const STATIC_TABS = {
+  inicio:     <TabInicio />,
   checklist:  <TabChecklist />,
   cronograma: <TabCronograma />,
   lista:      <TabLista />,
@@ -17,9 +18,7 @@ const STATIC_TABS = {
 export default function App() {
   const [activeTab, setActiveTab] = useState('inicio')
 
-  const tabContent = activeTab === 'inicio'
-    ? <TabInicio onTabChange={setActiveTab} />
-    : STATIC_TABS[activeTab]
+  const tabContent = STATIC_TABS[activeTab]
 
   return (
     <>

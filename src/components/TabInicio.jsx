@@ -1,26 +1,12 @@
-import { useApp } from '../AppContext'
 import Countdown from './Countdown'
 
-export default function TabInicio({ onTabChange }) {
-  const { progress, doneCheck, totalCheck } = useApp()
-
+export default function TabInicio() {
   return (
     <>
     {/* COUNTDOWN */}
       <div className="card">
         <h3 className="card-title">📅 Contagem Regressiva</h3>
         <Countdown />
-      </div>
-
-      {/* PROGRESSO DO CHECKLIST */}
-      <div className="card card-clickable" onClick={() => onTabChange('checklist')}>
-        <h3 className="card-title">✅ Progresso do Checklist</h3>
-        <div className="progress-bar-wrap">
-          <div className="progress-bar" style={{ width: `${progress}%` }} />
-        </div>
-        <p className="progress-label">
-          {doneCheck} de {totalCheck} itens concluídos ({progress}%)
-        </p>
       </div>
 
       {/* DADOS DO EVENTO */}
@@ -64,7 +50,6 @@ export default function TabInicio({ onTabChange }) {
                 </span>
               </td>
             </tr>
-            <tr><td>Convidados</td><td>120 pessoas</td></tr>
             <tr><td>Crianças</td><td>Até 9 anos não contam; 10+ contam</td></tr>
           </tbody>
         </table>

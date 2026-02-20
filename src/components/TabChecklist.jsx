@@ -3,7 +3,7 @@ import { useApp } from '../AppContext'
 import { CHECKLIST_GRUPOS, IDEIAS } from '../data'
 
 export default function TabChecklist() {
-  const { checkState, toggleCheck, doneCheck, totalCheck, ideiaState, toggleIdeia } = useApp()
+  const { checkState, toggleCheck, doneCheck, totalCheck, progress, ideiaState, toggleIdeia } = useApp()
   const [openGroups, setOpenGroups] = useState({ porfora: true })
   const [openIdeias, setOpenIdeias] = useState({})
   const [ideiasSectionOpen, setIdeiasSectionOpen] = useState(true)
@@ -15,6 +15,17 @@ export default function TabChecklist() {
 
   return (
     <>
+      {/* PROGRESSO DO CHECKLIST */}
+      <div className="card">
+        <h3 className="card-title">✅ Progresso do Checklist</h3>
+        <div className="progress-bar-wrap">
+          <div className="progress-bar" style={{ width: `${progress}%` }} />
+        </div>
+        <p className="progress-label">
+          {doneCheck} de {totalCheck} itens concluídos ({progress}%)
+        </p>
+      </div>
+
       <div className="section-header">
         <h2>Checklist Geral</h2>
         <span className="badge badge-info">{doneCheck}/{totalCheck}</span>
