@@ -10,6 +10,17 @@ export default function TabInicio() {
 
   return (
     <>
+      {/* HERO LORENA */}
+      <div className="hero-lorena">
+        <div className="hero-avatar-wrap">
+          <img src="/lorena.jpeg" alt="Lorena" className="hero-avatar" />
+        </div>
+        <div className="hero-info">
+          <span className="hero-nome">Lorena</span>
+          <span className="hero-sub">15 anos · 28/06/2026</span>
+        </div>
+      </div>
+
     {/* COUNTDOWN */}
       <div className="card">
         <h3 className="card-title">📅 Contagem Regressiva</h3>
