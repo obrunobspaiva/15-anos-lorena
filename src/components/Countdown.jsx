@@ -21,24 +21,35 @@ export default function Countdown() {
   }, [])
 
   if (!time) {
-    return <p style={{ fontWeight: 700, color: 'var(--wine)', textAlign: 'center' }}>🎉 Hoje é o grande dia!</p>
+    return (
+      <div className="countdown-card">
+        <p className="countdown-today">🎉 Hoje é o grande dia!</p>
+      </div>
+    )
   }
 
   const boxes = [
-    { num: time.days,                         unit: 'Dias' },
-    { num: String(time.hours).padStart(2,'0'), unit: 'Horas' },
-    { num: String(time.mins).padStart(2,'0'),  unit: 'Min' },
-    { num: String(time.secs).padStart(2,'0'),  unit: 'Seg' },
+    { num: time.days,                          unit: 'dias' },
+    { num: String(time.hours).padStart(2, '0'), unit: 'horas' },
+    { num: String(time.mins).padStart(2, '0'),  unit: 'min' },
+    { num: String(time.secs).padStart(2, '0'),  unit: 'seg' },
   ]
 
   return (
-    <div className="countdown-wrap">
-      {boxes.map(b => (
-        <div key={b.unit} className="countdown-box">
-          <span className="countdown-num">{b.num}</span>
-          <span className="countdown-unit">{b.unit}</span>
-        </div>
-      ))}
+    <div className="countdown-card">
+      <p className="countdown-label">🌸 Faltam</p>
+      <div className="countdown-wrap">
+        {boxes.map((b, i) => (
+          <div key={b.unit} className="countdown-slot">
+            <div className={`countdown-box ${b.unit === 'seg' ? 'countdown-box-pulse' : ''}`}>
+              <span className="countdown-num">{b.num}</span>
+            </div>
+            <span className="countdown-unit">{b.unit}</span>
+            {i < boxes.length - 1 && <span className="countdown-sep">:</span>}
+          </div>
+        ))}
+      </div>
+      <p className="countdown-date">28 de junho de 2026</p>
     </div>
   )
 }

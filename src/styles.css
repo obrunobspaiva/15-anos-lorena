@@ -281,17 +281,106 @@ body {
 .progress-label { font-size: 0.8rem; color: var(--text-light); text-align: center; }
 
 /* ── COUNTDOWN ── */
-.countdown-wrap { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-.countdown-box {
-  background: linear-gradient(145deg, var(--wine) 0%, #0F2550 100%);
-  color: white;
-  border-radius: 10px;
-  padding: 10px 14px;
+.countdown-card {
+  background: linear-gradient(145deg, #1E3A6E 0%, #0F2550 55%, #3A1040 130%);
+  border-radius: 20px;
+  padding: 22px 14px 18px;
   text-align: center;
-  min-width: 62px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 24px rgba(30,58,110,0.25);
 }
-.countdown-num  { display: block; font-size: 1.6rem; font-weight: 800; line-height: 1; }
-.countdown-unit { display: block; font-size: 0.62rem; opacity: 0.8; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+.countdown-card::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -30%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(212,64,122,0.12) 0%, transparent 55%);
+  pointer-events: none;
+}
+.countdown-label {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+.countdown-today {
+  font-size: 1.3rem;
+  font-weight: 800;
+  padding: 12px 0;
+}
+.countdown-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 6px;
+  position: relative;
+}
+.countdown-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.countdown-box {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  padding: 10px 6px;
+  min-width: 60px;
+  text-align: center;
+}
+.countdown-box-pulse {
+  animation: pulse-box 1s ease-in-out infinite;
+}
+.countdown-num {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.countdown-unit {
+  display: block;
+  font-size: 0.58rem;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-top: 6px;
+  font-weight: 600;
+}
+.countdown-sep {
+  position: absolute;
+  right: -9px;
+  top: 14px;
+  font-size: 1.3rem;
+  font-weight: 800;
+  opacity: 0.5;
+  animation: pulse-sep 1s ease-in-out infinite;
+}
+.countdown-date {
+  margin-top: 14px;
+  font-size: 0.72rem;
+  opacity: 0.6;
+  letter-spacing: 0.8px;
+  font-weight: 500;
+}
+@keyframes pulse-sep {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.12; }
+}
+@keyframes pulse-box {
+  0%, 100% { border-color: rgba(255,255,255,0.15); }
+  50% { border-color: rgba(212,64,122,0.4); }
+}
 
 /* ── FINANCE CARDS (tab) ── */
 .finance-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; }

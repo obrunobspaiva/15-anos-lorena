@@ -4,10 +4,7 @@ export default function TabInicio() {
   return (
     <>
     {/* COUNTDOWN */}
-      <div className="card">
-        <h3 className="card-title">📅 Contagem Regressiva</h3>
-        <Countdown />
-      </div>
+      <Countdown />
 
       {/* DADOS DO EVENTO */}
       <div className="card">
@@ -20,9 +17,6 @@ export default function TabInicio() {
             <tr>
               <td>Endereço</td>
               <td>
-                <span style={{ display: 'block', marginBottom: 6, fontSize: '0.8rem' }}>
-                  Av. Alcântara Machado, 1705 — Mooca, SP
-                </span>
                 <span style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
                   <a
                     href="https://waze.com/ul?q=Av.+Alcântara+Machado,+1705+Mooca+São+Paulo+SP"
