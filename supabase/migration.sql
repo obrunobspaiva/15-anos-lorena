@@ -44,6 +44,7 @@ alter table public.convidados add column if not exists foi        boolean not nu
 alter table public.convidados add column if not exists grupo      text not null default 'Adulto';
 alter table public.convidados add column if not exists de_onde    text default '';
 alter table public.convidados add column if not exists ordem      integer not null default 0;
+alter table public.convidados add column if not exists whatsapp   text default null;
 
 alter table public.convidados enable row level security;
 

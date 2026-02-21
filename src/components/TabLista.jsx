@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { useToast } from '../useToast'
 
 const EMPTY_FORM = { nome: '', grupo: 'Adulto', de_onde: '', whatsapp: '' }
 const CAMPO_LABELS = { convidado: 'Convidado', provavel: 'Provável', confirmado: 'Confirmado', foi: 'Foi' }
@@ -27,14 +28,8 @@ function dbToWhatsapp(db) {
   return formatWhatsapp(digits)
 }
 
-function formatarDataHora(iso) {
-  const d = new Date(iso)
-  return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-}
-
 export default function TabLista() {
   const [lista,    setLista]    = useState([])
-  const [logs,     setLogs]     = useState([])
   const [loading,  setLoading]  = useState(true)
   const [modal,    setModal]    = useState(false)
   const [editando, setEditando] = useState(null)
@@ -43,32 +38,27 @@ export default function TabLista() {
   const [filtroStatus,      setFiltroStatus]      = useState('todos')
   const [busca,             setBusca]             = useState('')
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState(null)
-  const [logAberto,         setLogAberto]         = useState(false)
+  const [confirmExcluir,   setConfirmExcluir]   = useState(null)
+  const toast = useToast()
 
   /* ── Carga e real-time ── */
   useEffect(() => {
     carregar()
-    carregarLogs()
     const ch = supabase
       .channel('lista_rt')
       .on('postgres_changes', { event: '*',    schema: 'public', table: 'convidados'     }, carregar)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'logs_convidados' }, carregarLogs)
       .subscribe()
     return () => supabase.removeChannel(ch)
   }, [])
 
   function carregar() {
     supabase.from('convidados').select('*').order('ordem', { ascending: true })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) { toast.error('Erro ao carregar convidados'); return }
         if (data) setLista(data)
         setLoading(false)
         setUltimaAtualizacao(new Date())
       })
-  }
-
-  function carregarLogs() {
-    supabase.from('logs_convidados').select('*').order('created_at', { ascending: false }).limit(100)
-      .then(({ data }) => { if (data) setLogs(data) })
   }
 
   async function registrarLog(acao, nome, detalhes = '') {
@@ -83,6 +73,8 @@ export default function TabLista() {
   const nFoi         = lista.filter(c => c.foi).length
   const nAdulto      = lista.filter(c => c.grupo === 'Adulto').length
   const nAdolescente = lista.filter(c => c.grupo === 'Adolescente').length
+  const nComWhatsapp  = lista.filter(c => c.whatsapp).length
+  const nSemWhatsapp  = total - nComWhatsapp
   const origens = ['Mãe', 'Pai', 'Amigos'].map(o => ({
     label: o, count: lista.filter(c => c.de_onde === o).length,
   }))
@@ -102,49 +94,86 @@ export default function TabLista() {
 
   /* ── CRUD ── */
   async function salvar() {
-    if (!form.nome.trim() || !form.grupo || !form.de_onde) return
-    const whatsappDb = whatsappToDb(form.whatsapp)
-    if (editando) {
-      await supabase.from('convidados').update({
-        nome: form.nome, grupo: form.grupo, de_onde: form.de_onde, whatsapp: whatsappDb || null,
-      }).eq('id', editando.id)
-      const mudancas = []
-      if (form.nome       !== editando.nome)              mudancas.push(`Nome: "${editando.nome}" → "${form.nome}"`)
-      if (form.grupo      !== editando.grupo)             mudancas.push(`Grupo: ${editando.grupo} → ${form.grupo}`)
-      if (form.de_onde    !== (editando.de_onde || ''))   mudancas.push(`De onde: "${editando.de_onde || '—'}" → "${form.de_onde || '—'}"`)
-      const oldWpp = editando.whatsapp || ''
-      if (whatsappDb !== oldWpp) mudancas.push(`WhatsApp: ${oldWpp || '—'} → ${whatsappDb || '—'}`)
-      if (mudancas.length) await registrarLog('Editou', editando.nome, mudancas.join(' · '))
-    } else {
-      const maxOrdem = lista.reduce((m, c) => Math.max(m, c.ordem || 0), 0)
-      await supabase.from('convidados').insert({
-        nome: form.nome, grupo: form.grupo, de_onde: form.de_onde, whatsapp: whatsappDb || null,
-        ordem: maxOrdem + 1,
-      })
-      await registrarLog('Adicionou', form.nome, `${form.grupo} · ${form.de_onde}`)
+    if (!form.nome.trim()) { toast.warn('Preencha o nome do convidado'); return }
+    if (!form.grupo)       { toast.warn('Selecione o grupo'); return }
+    if (!form.de_onde)     { toast.warn('Selecione de onde conhece'); return }
+    const wppDigits = form.whatsapp.replace(/\D/g, '')
+    if (wppDigits.length > 0 && wppDigits.length !== 11) {
+      toast.warn('WhatsApp inválido. Use o formato (99) 99999-9999')
+      return
     }
-    setUltimaAtualizacao(new Date())
-    fechar()
+    const whatsappDb = whatsappToDb(form.whatsapp)
+    const nomeLower = form.nome.trim().toLowerCase()
+    const duplicNome = lista.find(c => c.nome.toLowerCase() === nomeLower && c.id !== editando?.id)
+    if (duplicNome) { toast.warn(`Já existe um convidado com o nome "${duplicNome.nome}"`); return }
+    if (whatsappDb) {
+      const duplicWpp = lista.find(c => c.whatsapp === whatsappDb && c.id !== editando?.id)
+      if (duplicWpp) { toast.warn(`WhatsApp já cadastrado para "${duplicWpp.nome}"`); return }
+    }
+    try {
+      if (editando) {
+        const { error } = await supabase.from('convidados').update({
+          nome: form.nome, grupo: form.grupo, de_onde: form.de_onde, whatsapp: whatsappDb || null,
+        }).eq('id', editando.id)
+        if (error) throw error
+        const mudancas = []
+        if (form.nome       !== editando.nome)              mudancas.push(`Nome: "${editando.nome}" → "${form.nome}"`)
+        if (form.grupo      !== editando.grupo)             mudancas.push(`Grupo: ${editando.grupo} → ${form.grupo}`)
+        if (form.de_onde    !== (editando.de_onde || ''))   mudancas.push(`De onde: "${editando.de_onde || '—'}" → "${form.de_onde || '—'}"`)
+        const oldWpp = editando.whatsapp || ''
+        if (whatsappDb !== oldWpp) mudancas.push(`WhatsApp: ${oldWpp || '—'} → ${whatsappDb || '—'}`)
+        if (mudancas.length) await registrarLog('Editou', editando.nome, mudancas.join(' · '))
+      } else {
+        const maxOrdem = lista.reduce((m, c) => Math.max(m, c.ordem || 0), 0)
+        const { error } = await supabase.from('convidados').insert({
+          nome: form.nome, grupo: form.grupo, de_onde: form.de_onde, whatsapp: whatsappDb || null,
+          ordem: maxOrdem + 1,
+        })
+        if (error) throw error
+        await registrarLog('Adicionou', form.nome, `${form.grupo} · ${form.de_onde}`)
+      }
+      setUltimaAtualizacao(new Date())
+      fechar()
+    } catch {
+      toast.error('Erro ao salvar convidado. Tente novamente.')
+    }
   }
 
-  async function excluir(id) {
+  function excluir(id) {
     const c = lista.find(x => x.id === id)
-    if (!window.confirm(`Excluir "${c?.nome}"?`)) return
-    await supabase.from('convidados').delete().eq('id', id)
-    await registrarLog('Excluiu', c?.nome || '?', `${c?.grupo}${c?.de_onde ? ' · ' + c.de_onde : ''}`)
-    setUltimaAtualizacao(new Date())
+    if (!c) return
+    setConfirmExcluir(c)
+  }
+
+  async function confirmarExclusao() {
+    const c = confirmExcluir
+    setConfirmExcluir(null)
+    if (!c) return
+    try {
+      const { error } = await supabase.from('convidados').delete().eq('id', c.id)
+      if (error) throw error
+      await registrarLog('Excluiu', c.nome, `${c.grupo}${c.de_onde ? ' · ' + c.de_onde : ''}`)
+      setUltimaAtualizacao(new Date())
+    } catch {
+      toast.error('Erro ao excluir convidado. Tente novamente.')
+    }
   }
 
   async function toggle(id, field) {
     const c = lista.find(x => x.id === id)
     const novoValor = !c[field]
-    await supabase.from('convidados').update({ [field]: novoValor }).eq('id', id)
-    await registrarLog(
-      novoValor ? 'Marcou' : 'Desmarcou',
-      c.nome,
-      `${CAMPO_LABELS[field]}: ${fmt(!novoValor)} → ${fmt(novoValor)}`
-    )
-    setUltimaAtualizacao(new Date())
+    try {
+      const { error } = await supabase.from('convidados').update({ [field]: novoValor }).eq('id', id)
+      if (error) throw error
+      await registrarLog(
+        novoValor ? 'Marcou' : 'Desmarcou',
+        c.nome,
+        `${CAMPO_LABELS[field]}: ${fmt(!novoValor)} → ${fmt(novoValor)}`
+      )
+      setUltimaAtualizacao(new Date())
+    } catch {
+      toast.error('Erro ao atualizar status. Tente novamente.')
+    }
   }
 
   function abrir(convidado = null) {
@@ -182,7 +211,7 @@ export default function TabLista() {
           <div className="lista-stat"><span className="lista-stat-num">{total}</span><span className="lista-stat-label">Total</span></div>
           <div className="lista-stat"><span className="lista-stat-num" style={{ color: 'var(--wine)' }}>{nConvidado}</span><span className="lista-stat-label">Convidado</span></div>
           <div className="lista-stat"><span className="lista-stat-num warn">{nProvavel}</span><span className="lista-stat-label">Provável</span></div>
-          <div className="lista-stat"><span className="lista-stat-num success">{nConfirmado}</span><span className="lista-stat-label">Confirmado</span></div>
+          <div className="lista-stat"><span className="lista-stat-num success">{nConfirmado}</span><span className="lista-stat-label">Confir.</span></div>
           <div className="lista-stat"><span className="lista-stat-num info">{nFoi}</span><span className="lista-stat-label">Foi</span></div>
         </div>
 
@@ -209,6 +238,17 @@ export default function TabLista() {
             <span className="lista-origem-label">Outros</span>
             <span className="lista-origem-count">{nOutros}</span>
             <span className="lista-origem-pct">{total ? Math.round(nOutros / total * 100) : 0}%</span>
+          </div>
+        </div>
+
+        <div className="lista-whatsapp-stats">
+          <span className="lista-whatsapp-title">WhatsApp</span>
+          <div className="lista-whatsapp-bar">
+            <div className="lista-whatsapp-fill" style={{ width: total ? `${Math.round(nComWhatsapp / total * 100)}%` : '0%' }} />
+          </div>
+          <div className="lista-whatsapp-nums">
+            <span className="lista-whatsapp-ok">{nComWhatsapp} com</span>
+            <span className="lista-whatsapp-miss">{nSemWhatsapp} sem</span>
           </div>
         </div>
 
@@ -278,36 +318,6 @@ export default function TabLista() {
         )}
       </div>
 
-      {/* ── LOG DE ALTERAÇÕES ── */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <button
-          className="log-toggle"
-          onClick={() => setLogAberto(v => !v)}
-        >
-          <span>📋 Log de Alterações <span className="log-count">{logs.length}</span></span>
-          <span className="log-arrow">{logAberto ? '▾' : '▸'}</span>
-        </button>
-
-        {logAberto && (
-          logs.length === 0 ? (
-            <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-light)', fontSize: '0.82rem' }}>
-              Nenhuma alteração registrada ainda.
-            </div>
-          ) : (
-            logs.map(log => (
-              <div key={log.id} className="log-entry">
-                <span className={`log-acao log-acao-${log.acao.toLowerCase()}`}>{log.acao}</span>
-                <div className="log-corpo">
-                  <span className="log-nome">{log.convidado_nome}</span>
-                  {log.detalhes && <span className="log-detalhes">{log.detalhes}</span>}
-                  <span className="log-data">{formatarDataHora(log.created_at)}</span>
-                </div>
-              </div>
-            ))
-          )
-        )}
-      </div>
-
       {/* ── MODAL ── */}
       {modal && (
         <div className="modal-overlay" onClick={fechar}>
@@ -357,6 +367,25 @@ export default function TabLista() {
             <div className="modal-footer">
               <button className="modal-btn-cancel" onClick={fechar}>Cancelar</button>
               <button className="modal-btn-save" onClick={salvar}>Salvar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── CONFIRM EXCLUIR ── */}
+      {confirmExcluir && (
+        <div className="modal-overlay confirm-overlay" onClick={() => setConfirmExcluir(null)}>
+          <div className="confirm-box" onClick={e => e.stopPropagation()}>
+            <div className="confirm-icon">🗑️</div>
+            <h3 className="confirm-title">Excluir convidado?</h3>
+            <p className="confirm-nome">{confirmExcluir.nome}</p>
+            <p className="confirm-desc">
+              {confirmExcluir.grupo}{confirmExcluir.de_onde ? ` · ${confirmExcluir.de_onde}` : ''}
+            </p>
+            <p className="confirm-aviso">Esta ação não pode ser desfeita.</p>
+            <div className="confirm-actions">
+              <button className="confirm-btn-cancel" onClick={() => setConfirmExcluir(null)}>Cancelar</button>
+              <button className="confirm-btn-delete" onClick={confirmarExclusao}>Excluir</button>
             </div>
           </div>
         </div>

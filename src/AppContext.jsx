@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { CHECKLIST_GRUPOS, PENDENCIAS } from './data'
 import { supabase } from './lib/supabase'
+import { useToast } from './useToast'
 
 /* ── localStorage helpers (cache offline) ── */
 function load(key, fallback) {
@@ -18,6 +19,7 @@ export function AppProvider({ children }) {
   const [pendState,  setPendState]  = useState(() => load('lorena15_pendencias', {}))
   const [cerState,   setCerState]   = useState(() => load('lorena15_cerimonia',  {}))
   const [ideiaState, setIdeiaState] = useState(() => load('lorena15_ideias',     {}))
+  const toast = useToast()
 
   /* ── Supabase: carga inicial + real-time ── */
   useEffect(() => {
@@ -27,7 +29,8 @@ export function AppProvider({ children }) {
       .select('id, data')
       .in('id', ['checklist', 'pendencias', 'cerimonia', 'ideias'])
       .then(({ data, error }) => {
-        if (error || !data) return
+        if (error) { toast.error('Erro ao sincronizar dados'); return }
+        if (!data) return
         data.forEach(row => {
           if (row.id === 'checklist') { setCheckState(row.data); save('lorena15_checklist', row.data) }
           if (row.id === 'pendencias') { setPendState(row.data);  save('lorena15_pendencias', row.data) }
@@ -56,7 +59,9 @@ export function AppProvider({ children }) {
 
   /* ── Sync helper ── */
   function syncToSupabase(id, data) {
-    supabase.from('app_state').upsert({ id, data }).then()
+    supabase.from('app_state').upsert({ id, data }).then(({ error }) => {
+      if (error) toast.error('Erro ao salvar alteração')
+    })
   }
 
   /* ── Checklist ── */
