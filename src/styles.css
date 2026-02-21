@@ -475,6 +475,10 @@ body {
 .accordion-btn.open::after { transform: rotate(90deg); }
 .accordion-body { display: none; padding: 12px 14px; background: var(--bg); border-top: 1px solid var(--border); }
 .accordion-body.open { display: block; }
+.lista-filtro-badge {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  background: var(--wine); color: #fff; padding: 2px 8px; border-radius: 10px;
+}
 .effects-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 
 /* ── SUBNAV ── */

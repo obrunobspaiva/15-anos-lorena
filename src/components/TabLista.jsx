@@ -39,6 +39,8 @@ export default function TabLista() {
   const [busca,             setBusca]             = useState('')
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState(null)
   const [confirmExcluir,   setConfirmExcluir]   = useState(null)
+  const [resumoAberto,     setResumoAberto]     = useState(false)
+  const [filtrosAberto,    setFiltrosAberto]    = useState(false)
   const toast = useToast()
 
   /* ── Carga e real-time ── */
@@ -195,84 +197,91 @@ export default function TabLista() {
 
   return (
     <>
-      {/* ── RESUMO ── */}
-      <div className="card">
-        <div className="lista-resumo-header">
-          <h3 className="card-title" style={{ marginBottom: 0 }}>👥 Lista de Convidados</h3>
+      {/* ── RESUMO (accordion) ── */}
+      <div className="accordion">
+        <button className={`accordion-btn${resumoAberto ? ' open' : ''}`} onClick={() => setResumoAberto(v => !v)}>
+          <span>👥 Resumo — {total} convidados</span>
           {ultimaAtualizacao && (
-            <span className="lista-ultima-atualizacao">
-              Atualizado {ultimaAtualizacao.toLocaleDateString('pt-BR')} às{' '}
+            <span className="lista-ultima-atualizacao" style={{ marginLeft: 'auto', marginRight: 8 }}>
               {ultimaAtualizacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
             </span>
           )}
-        </div>
-
-        <div className="lista-stats-grid lista-stats-5">
-          <div className="lista-stat"><span className="lista-stat-num">{total}</span><span className="lista-stat-label">Total</span></div>
-          <div className="lista-stat"><span className="lista-stat-num" style={{ color: 'var(--wine)' }}>{nConvidado}</span><span className="lista-stat-label">Convidado</span></div>
-          <div className="lista-stat"><span className="lista-stat-num warn">{nProvavel}</span><span className="lista-stat-label">Provável</span></div>
-          <div className="lista-stat"><span className="lista-stat-num success">{nConfirmado}</span><span className="lista-stat-label">Confir.</span></div>
-          <div className="lista-stat"><span className="lista-stat-num info">{nFoi}</span><span className="lista-stat-label">Foi</span></div>
-        </div>
-
-        <div className="lista-grupo-grid">
-          <div className="lista-grupo-item">
-            <span className="lista-grupo-num">{nAdulto}</span>
-            <div><span className="lista-grupo-label">Adultos</span><span className="lista-grupo-pct">{total ? Math.round(nAdulto / total * 100) : 0}%</span></div>
+        </button>
+        <div className={`accordion-body${resumoAberto ? ' open' : ''}`}>
+          <div className="lista-stats-grid lista-stats-5">
+            <div className="lista-stat"><span className="lista-stat-num">{total}</span><span className="lista-stat-label">Total</span></div>
+            <div className="lista-stat"><span className="lista-stat-num" style={{ color: 'var(--wine)' }}>{nConvidado}</span><span className="lista-stat-label">Convidado</span></div>
+            <div className="lista-stat"><span className="lista-stat-num warn">{nProvavel}</span><span className="lista-stat-label">Provável</span></div>
+            <div className="lista-stat"><span className="lista-stat-num success">{nConfirmado}</span><span className="lista-stat-label">Confir.</span></div>
+            <div className="lista-stat"><span className="lista-stat-num info">{nFoi}</span><span className="lista-stat-label">Foi</span></div>
           </div>
-          <div className="lista-grupo-item">
-            <span className="lista-grupo-num">{nAdolescente}</span>
-            <div><span className="lista-grupo-label">Adolescentes</span><span className="lista-grupo-pct">{total ? Math.round(nAdolescente / total * 100) : 0}%</span></div>
-          </div>
-        </div>
 
-        <div className="lista-origem">
-          {origens.map(o => (
-            <div key={o.label} className="lista-origem-item">
-              <span className="lista-origem-label">{o.label}</span>
-              <span className="lista-origem-count">{o.count}</span>
-              <span className="lista-origem-pct">{total ? Math.round(o.count / total * 100) : 0}%</span>
+          <div className="lista-grupo-grid">
+            <div className="lista-grupo-item">
+              <span className="lista-grupo-num">{nAdulto}</span>
+              <div><span className="lista-grupo-label">Adultos</span><span className="lista-grupo-pct">{total ? Math.round(nAdulto / total * 100) : 0}%</span></div>
             </div>
-          ))}
-          <div className="lista-origem-item">
-            <span className="lista-origem-label">Outros</span>
-            <span className="lista-origem-count">{nOutros}</span>
-            <span className="lista-origem-pct">{total ? Math.round(nOutros / total * 100) : 0}%</span>
+            <div className="lista-grupo-item">
+              <span className="lista-grupo-num">{nAdolescente}</span>
+              <div><span className="lista-grupo-label">Adolescentes</span><span className="lista-grupo-pct">{total ? Math.round(nAdolescente / total * 100) : 0}%</span></div>
+            </div>
+          </div>
+
+          <div className="lista-origem">
+            {origens.map(o => (
+              <div key={o.label} className="lista-origem-item">
+                <span className="lista-origem-label">{o.label}</span>
+                <span className="lista-origem-count">{o.count}</span>
+                <span className="lista-origem-pct">{total ? Math.round(o.count / total * 100) : 0}%</span>
+              </div>
+            ))}
+            <div className="lista-origem-item">
+              <span className="lista-origem-label">Outros</span>
+              <span className="lista-origem-count">{nOutros}</span>
+              <span className="lista-origem-pct">{total ? Math.round(nOutros / total * 100) : 0}%</span>
+            </div>
+          </div>
+
+          <div className="lista-whatsapp-stats">
+            <span className="lista-whatsapp-title">WhatsApp</span>
+            <div className="lista-whatsapp-bar">
+              <div className="lista-whatsapp-fill" style={{ width: total ? `${Math.round(nComWhatsapp / total * 100)}%` : '0%' }} />
+            </div>
+            <div className="lista-whatsapp-nums">
+              <span className="lista-whatsapp-ok">{nComWhatsapp} com</span>
+              <span className="lista-whatsapp-miss">{nSemWhatsapp} sem</span>
+            </div>
           </div>
         </div>
-
-        <div className="lista-whatsapp-stats">
-          <span className="lista-whatsapp-title">WhatsApp</span>
-          <div className="lista-whatsapp-bar">
-            <div className="lista-whatsapp-fill" style={{ width: total ? `${Math.round(nComWhatsapp / total * 100)}%` : '0%' }} />
-          </div>
-          <div className="lista-whatsapp-nums">
-            <span className="lista-whatsapp-ok">{nComWhatsapp} com</span>
-            <span className="lista-whatsapp-miss">{nSemWhatsapp} sem</span>
-          </div>
-        </div>
-
       </div>
 
-      {/* ── FILTROS ── */}
-      <div className="card" style={{ padding: '12px 14px' }}>
-        <input
-          className="lista-search"
-          type="text"
-          placeholder="🔍  Buscar convidado..."
-          value={busca}
-          onChange={e => setBusca(e.target.value)}
-        />
-        <div className="lista-filter-row">
-          <div className="filter-chips" style={{ marginBottom: 0, flexWrap: 'nowrap', overflowX: 'auto' }}>
-            {[['todos', 'Todos'], ['Adulto', 'Adultos'], ['Adolescente', 'Adolesc.']].map(([v, l]) => (
-              <button key={v} className={`chip ${filtroGrupo === v ? 'active' : ''}`} onClick={() => setFiltroGrupo(v)}>{l}</button>
-            ))}
-          </div>
-          <div className="filter-chips" style={{ marginBottom: 0, flexWrap: 'nowrap', overflowX: 'auto' }}>
-            {[['todos', 'Todos'], ['convidado', 'Convidado'], ['provavel', 'Provável'], ['confirmado', 'Confirm.'], ['foi', 'Foi']].map(([v, l]) => (
-              <button key={v} className={`chip ${filtroStatus === v ? 'active' : ''}`} onClick={() => setFiltroStatus(v)}>{l}</button>
-            ))}
+      {/* ── FILTROS (accordion) ── */}
+      <div className="accordion">
+        <button className={`accordion-btn${filtrosAberto ? ' open' : ''}`} onClick={() => setFiltrosAberto(v => !v)}>
+          <span>🔍 Busca e Filtros</span>
+          {(busca || filtroGrupo !== 'todos' || filtroStatus !== 'todos') && (
+            <span className="lista-filtro-badge" style={{ marginLeft: 'auto', marginRight: 8 }}>Ativo</span>
+          )}
+        </button>
+        <div className={`accordion-body${filtrosAberto ? ' open' : ''}`} style={{ padding: '12px 14px' }}>
+          <input
+            className="lista-search"
+            type="text"
+            placeholder="Buscar convidado..."
+            value={busca}
+            onChange={e => setBusca(e.target.value)}
+          />
+          <div className="lista-filter-row">
+            <div className="filter-chips" style={{ marginBottom: 0, flexWrap: 'nowrap', overflowX: 'auto' }}>
+              {[['todos', 'Todos'], ['Adulto', 'Adultos'], ['Adolescente', 'Adolesc.']].map(([v, l]) => (
+                <button key={v} className={`chip ${filtroGrupo === v ? 'active' : ''}`} onClick={() => setFiltroGrupo(v)}>{l}</button>
+              ))}
+            </div>
+            <div className="filter-chips" style={{ marginBottom: 0, flexWrap: 'nowrap', overflowX: 'auto' }}>
+              {[['todos', 'Todos'], ['convidado', 'Convidado'], ['provavel', 'Provável'], ['confirmado', 'Confirm.'], ['foi', 'Foi']].map(([v, l]) => (
+                <button key={v} className={`chip ${filtroStatus === v ? 'active' : ''}`} onClick={() => setFiltroStatus(v)}>{l}</button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
