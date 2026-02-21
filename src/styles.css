@@ -545,6 +545,7 @@ body {
 .timeline-block.open .timeline-arrow { transform: rotate(90deg); }
 .timeline-body  { display: none; padding: 0 14px 14px; border-top: 1px solid var(--border); background: var(--bg); }
 .timeline-block.open .timeline-body { display: block; padding-top: 12px; }
+.timeline-nota { margin: 10px 0 4px; font-size: 0.82rem; color: var(--text-secondary); font-style: italic; line-height: 1.5; }
 
 /* ── CHECKLIST ── */
 .checklist-group { margin-bottom: 14px; }
@@ -1206,7 +1207,10 @@ body {
 .modal-checks { display: flex; gap: 18px; flex-wrap: wrap; }
 .modal-check { display: flex; align-items: center; gap: 7px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
 .modal-check input { width: 16px; height: 16px; accent-color: var(--wine); }
-.modal-footer { display: flex; gap: 8px; padding: 12px 18px 20px; border-top: 1px solid var(--border); }
+.modal-footer { display: flex; gap: 8px; padding: 12px 18px calc(20px + var(--nav-h)); border-top: 1px solid var(--border); }
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .modal-footer { padding-bottom: calc(20px + var(--nav-h) + env(safe-area-inset-bottom)); }
+}
 .modal-btn-cancel { flex: 1; padding: 12px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--card-bg); font-size: 0.9rem; font-weight: 700; color: var(--text-light); cursor: pointer; }
 .modal-btn-save   { flex: 2; padding: 12px; border: none; border-radius: 10px; background: var(--wine); color: white; font-size: 0.9rem; font-weight: 700; cursor: pointer; }
 

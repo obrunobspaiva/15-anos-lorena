@@ -1,38 +1,32 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
+import { retrieveChunks } from '../rag'
+
+const STORAGE_KEY = 'lorena15_chat'
+
+function loadMessages() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch { return [] }
+}
+
+function saveMessages(msgs) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs))
+}
+
+let msgCounter = Date.now()
 
 export default function TabChat() {
-  const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState(loadMessages)
   const [input,    setInput]    = useState('')
   const [loading,  setLoading]  = useState(false)
-  const [fetching, setFetching] = useState(true)
   const bottomRef = useRef(null)
 
-  /* ── Carrega histórico ao montar ── */
+  /* ── Persiste no localStorage a cada mudança ── */
   useEffect(() => {
-    supabase
-      .from('chat_messages')
-      .select('*')
-      .order('created_at', { ascending: true })
-      .limit(50)
-      .then(({ data }) => {
-        if (data) setMessages(data)
-        setFetching(false)
-      })
-
-    /* Realtime: novas mensagens de outros dispositivos */
-    const ch = supabase
-      .channel('chat_rt')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' },
-        ({ new: row }) => setMessages(prev => {
-          if (prev.find(m => m.id === row.id)) return prev
-          return [...prev, row]
-        })
-      )
-      .subscribe()
-
-    return () => supabase.removeChannel(ch)
-  }, [])
+    saveMessages(messages)
+  }, [messages])
 
   /* ── Scroll automático ── */
   useEffect(() => {
@@ -46,32 +40,27 @@ export default function TabChat() {
     setInput('')
     setLoading(true)
 
-    /* 1. Salva mensagem do usuário */
-    await supabase
-      .from('chat_messages')
-      .insert({ role: 'user', content: text })
+    const userMsg = { id: ++msgCounter, role: 'user', content: text }
+    const updated = [...messages, userMsg]
+    setMessages(updated)
 
-    const historyForApi = [
-      ...messages.map(m => ({ role: m.role, content: m.content })),
-      { role: 'user', content: text },
-    ]
+    /* Retrieval: busca chunks relevantes nos documentos */
+    const relevantDocs = retrieveChunks(text)
 
-    /* 2. Chama Edge Function via supabase.functions.invoke (auth automático) */
+    const historyForApi = updated.map(m => ({ role: m.role, content: m.content }))
+
     try {
       const { data, error } = await supabase.functions.invoke('chat-ai', {
-        body: { messages: historyForApi },
+        body: { messages: historyForApi, context: relevantDocs },
       })
 
       if (error) throw new Error(error.message)
 
-      /* 3. Salva resposta do assistente */
-      await supabase
-        .from('chat_messages')
-        .insert({ role: 'assistant', content: data.reply })
-    } catch (err) {
-      await supabase
-        .from('chat_messages')
-        .insert({ role: 'assistant', content: '⚠️ Erro ao obter resposta. Tente novamente.' })
+      const assistantMsg = { id: ++msgCounter, role: 'assistant', content: data.reply }
+      setMessages(prev => [...prev, assistantMsg])
+    } catch {
+      const errorMsg = { id: ++msgCounter, role: 'assistant', content: '⚠️ Erro ao obter resposta. Tente novamente.' }
+      setMessages(prev => [...prev, errorMsg])
     }
 
     setLoading(false)
@@ -81,9 +70,9 @@ export default function TabChat() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
   }
 
-  async function limpar() {
+  function limpar() {
     if (!window.confirm('Apagar todo o histórico do chat?')) return
-    await supabase.from('chat_messages').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    localStorage.removeItem(STORAGE_KEY)
     setMessages([])
   }
 
@@ -93,19 +82,17 @@ export default function TabChat() {
       <div className="chat-header">
         <div>
           <span className="chat-header-title">💬 Assistente da Festa</span>
-          <span className="chat-header-sub">Pergunte sobre o evento, orçamento, cronograma…</span>
+          <span className="chat-header-sub">Pergunte sobre o evento, orçamento, contratos…</span>
         </div>
         <button className="chat-clear-btn" onClick={limpar} title="Limpar histórico">🗑️</button>
       </div>
 
       {/* MENSAGENS */}
       <div className="chat-messages">
-        {fetching ? (
-          <div className="chat-loading-init">Carregando histórico…</div>
-        ) : messages.length === 0 ? (
+        {messages.length === 0 ? (
           <div className="chat-empty">
             <p>Olá! Sou o assistente da festa de 15 anos da Lorena.</p>
-            <p>Posso ajudar com dúvidas sobre o evento, orçamento, fornecedores e cronograma.</p>
+            <p>Posso ajudar com dúvidas sobre o evento, orçamento, contratos, fornecedores e cronograma.</p>
           </div>
         ) : (
           messages.map(m => (

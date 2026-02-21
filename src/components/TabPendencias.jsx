@@ -165,7 +165,7 @@ export default function TabPendencias() {
                 ['MC / Mestre de cerimônias',         'alta',  '28/05/2026'],
                 ['Banda de pagode (1h30)',             'alta',  '28/05/2026'],
                 ['Maquiagem + cabelo + retoques',      'media', '28/05/2026'],
-                ['Vestidos (2 looks)',                 'alta',  '30/04/2026'],
+                ['Vestidos (3 looks)',                 'alta',  '30/04/2026'],
                 ['Convites impressos',                 'media', '28/04/2026'],
                 ['Decoração floral adicional',         'baixa', '28/05/2026'],
                 ['Lembrancinhas',                      'media', '28/05/2026'],

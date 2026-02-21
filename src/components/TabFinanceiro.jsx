@@ -105,16 +105,18 @@ export default function TabFinanceiro() {
             <tbody>
               {[
                 { label: 'MC / Mestre de cerimônias',         prio: 'alta'  },
-                { label: 'Banda de pagode (1h30)',             prio: 'alta'  },
                 { label: 'Maquiagem + cabelo + retoques',      prio: 'media' },
-                { label: 'Vestidos debutante (2 looks)',       prio: 'alta'  },
+                { label: 'Vestidos debutante (3 looks)',       prio: 'alta'  },
+                { label: 'Robô de LED',                        prio: 'alta',  estimativa: 'R$ 1.200–1.800' },
+                { label: 'Lembrancinhas (Gloss + Doce)',       prio: 'media' },
+                { label: 'Kit Balada',                         prio: 'media' },
+                { label: 'Cartão QR — Galeria Digital',        prio: 'baixa', estimativa: 'R$ 80–150' },
                 { label: 'Convites impressos',                 prio: 'media' },
                 { label: 'Decoração floral adicional',         prio: 'baixa' },
-                { label: 'Lembrancinhas',                      prio: 'media' },
               ].map(r => (
                 <tr key={r.label}>
                   <td>{r.label}</td>
-                  <td>A definir</td>
+                  <td>{r.estimativa || 'A orçar'}</td>
                   <td>
                     <Tag type={r.prio === 'alta' ? 'danger' : r.prio === 'media' ? 'warn' : 'info'}>
                       {r.prio === 'alta' ? 'ALTA' : r.prio === 'media' ? 'MÉDIA' : 'BAIXA'}

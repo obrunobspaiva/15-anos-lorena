@@ -42,6 +42,7 @@ export default function TabCronograma() {
                     </tbody>
                   </table>
                 </div>
+                {b.nota && <p className="timeline-nota">{b.nota}</p>}
               </div>
             </div>
           )

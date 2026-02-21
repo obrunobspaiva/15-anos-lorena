@@ -1,10 +1,31 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
-const EMPTY_FORM = { nome: '', grupo: 'Adulto', de_onde: '', convidado: false, provavel: false, confirmado: false, foi: false }
+const EMPTY_FORM = { nome: '', grupo: 'Adulto', de_onde: '', whatsapp: '' }
 const CAMPO_LABELS = { convidado: 'Convidado', provavel: 'Provável', confirmado: 'Confirmado', foi: 'Foi' }
 
 function fmt(v) { return v ? 'Sim' : 'Não' }
+
+/* ── WhatsApp helpers ── */
+function formatWhatsapp(raw) {
+  const digits = raw.replace(/\D/g, '').slice(0, 11)
+  if (digits.length === 0) return ''
+  if (digits.length <= 2) return `(${digits}`
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
+}
+
+function whatsappToDb(display) {
+  const digits = display.replace(/\D/g, '')
+  if (digits.length !== 11) return ''
+  return '55' + digits
+}
+
+function dbToWhatsapp(db) {
+  if (!db) return ''
+  const digits = db.startsWith('55') ? db.slice(2) : db
+  return formatWhatsapp(digits)
+}
 
 function formatarDataHora(iso) {
   const d = new Date(iso)
@@ -81,25 +102,26 @@ export default function TabLista() {
 
   /* ── CRUD ── */
   async function salvar() {
-    if (!form.nome.trim()) return
+    if (!form.nome.trim() || !form.grupo || !form.de_onde) return
+    const whatsappDb = whatsappToDb(form.whatsapp)
     if (editando) {
       await supabase.from('convidados').update({
-        nome: form.nome, grupo: form.grupo, de_onde: form.de_onde,
-        convidado: form.convidado, provavel: form.provavel, confirmado: form.confirmado, foi: form.foi,
+        nome: form.nome, grupo: form.grupo, de_onde: form.de_onde, whatsapp: whatsappDb || null,
       }).eq('id', editando.id)
       const mudancas = []
       if (form.nome       !== editando.nome)              mudancas.push(`Nome: "${editando.nome}" → "${form.nome}"`)
       if (form.grupo      !== editando.grupo)             mudancas.push(`Grupo: ${editando.grupo} → ${form.grupo}`)
       if (form.de_onde    !== (editando.de_onde || ''))   mudancas.push(`De onde: "${editando.de_onde || '—'}" → "${form.de_onde || '—'}"`)
-      if (form.convidado  !== editando.convidado)         mudancas.push(`Convidado: ${fmt(editando.convidado)} → ${fmt(form.convidado)}`)
-      if (form.provavel   !== editando.provavel)          mudancas.push(`Provável: ${fmt(editando.provavel)} → ${fmt(form.provavel)}`)
-      if (form.confirmado !== editando.confirmado)        mudancas.push(`Confirmado: ${fmt(editando.confirmado)} → ${fmt(form.confirmado)}`)
-      if (form.foi        !== editando.foi)               mudancas.push(`Foi: ${fmt(editando.foi)} → ${fmt(form.foi)}`)
+      const oldWpp = editando.whatsapp || ''
+      if (whatsappDb !== oldWpp) mudancas.push(`WhatsApp: ${oldWpp || '—'} → ${whatsappDb || '—'}`)
       if (mudancas.length) await registrarLog('Editou', editando.nome, mudancas.join(' · '))
     } else {
       const maxOrdem = lista.reduce((m, c) => Math.max(m, c.ordem || 0), 0)
-      await supabase.from('convidados').insert({ ...form, ordem: maxOrdem + 1 })
-      await registrarLog('Adicionou', form.nome, `${form.grupo}${form.de_onde ? ' · ' + form.de_onde : ''}`)
+      await supabase.from('convidados').insert({
+        nome: form.nome, grupo: form.grupo, de_onde: form.de_onde, whatsapp: whatsappDb || null,
+        ordem: maxOrdem + 1,
+      })
+      await registrarLog('Adicionou', form.nome, `${form.grupo} · ${form.de_onde}`)
     }
     setUltimaAtualizacao(new Date())
     fechar()
@@ -129,7 +151,7 @@ export default function TabLista() {
     setEditando(convidado)
     setForm(convidado ? {
       nome: convidado.nome, grupo: convidado.grupo, de_onde: convidado.de_onde || '',
-      convidado: convidado.convidado, provavel: convidado.provavel, confirmado: convidado.confirmado, foi: convidado.foi,
+      whatsapp: dbToWhatsapp(convidado.whatsapp),
     } : EMPTY_FORM)
     setModal(true)
   }
@@ -296,11 +318,11 @@ export default function TabLista() {
             </div>
             <div className="modal-body">
               <div className="modal-field">
-                <label className="modal-label">Nome</label>
+                <label className="modal-label">Nome *</label>
                 <input className="modal-input" value={form.nome} onChange={e => setForm(f => ({ ...f, nome: e.target.value }))} placeholder="Nome do convidado" autoFocus />
               </div>
               <div className="modal-field">
-                <label className="modal-label">Grupo</label>
+                <label className="modal-label">Grupo *</label>
                 <div className="modal-radio-group">
                   {['Adulto', 'Adolescente'].map(g => (
                     <label key={g} className={`modal-radio ${form.grupo === g ? 'selected' : ''}`}>
@@ -311,25 +333,25 @@ export default function TabLista() {
                 </div>
               </div>
               <div className="modal-field">
-                <label className="modal-label">De Onde</label>
-                <select className="modal-input" value={form.de_onde} onChange={e => setForm(f => ({ ...f, de_onde: e.target.value }))}>
-                  <option value="">— não informado —</option>
-                  <option value="Mãe">Mãe</option>
-                  <option value="Pai">Pai</option>
-                  <option value="Amigos">Amigos</option>
-                  <option value="Outros">Outros</option>
-                </select>
-              </div>
-              <div className="modal-field">
-                <label className="modal-label">Status</label>
-                <div className="modal-checks">
-                  {[['convidado', 'Convidado'], ['provavel', 'Provável'], ['confirmado', 'Confirmado'], ['foi', 'Foi']].map(([field, label]) => (
-                    <label key={field} className="modal-check">
-                      <input type="checkbox" checked={form[field]} onChange={() => setForm(f => ({ ...f, [field]: !f[field] }))} />
-                      {label}
+                <label className="modal-label">De Onde *</label>
+                <div className="modal-radio-group">
+                  {['Mãe', 'Pai', 'Amigos', 'Outros'].map(o => (
+                    <label key={o} className={`modal-radio ${form.de_onde === o ? 'selected' : ''}`}>
+                      <input type="radio" name="de_onde" checked={form.de_onde === o} onChange={() => setForm(f => ({ ...f, de_onde: o }))} />
+                      {o}
                     </label>
                   ))}
                 </div>
+              </div>
+              <div className="modal-field">
+                <label className="modal-label">WhatsApp</label>
+                <input
+                  className="modal-input"
+                  value={form.whatsapp}
+                  onChange={e => setForm(f => ({ ...f, whatsapp: formatWhatsapp(e.target.value) }))}
+                  placeholder="(99) 99999-9999"
+                  inputMode="tel"
+                />
               </div>
             </div>
             <div className="modal-footer">
