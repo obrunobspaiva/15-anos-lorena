@@ -5,9 +5,21 @@ export default function Countdown() {
   const [time, setTime] = useState(calcTime())
 
   function calcTime() {
-    const diff = EVENTO.data - new Date()
-    if (diff <= 0) return null
+    const now = new Date()
+    const target = EVENTO.data
+    if (target - now <= 0) return null
+
+    let months = (target.getFullYear() - now.getFullYear()) * 12 + (target.getMonth() - now.getMonth())
+    const tempDate = new Date(now)
+    tempDate.setMonth(tempDate.getMonth() + months)
+    if (tempDate > target) months--
+
+    const afterMonths = new Date(now)
+    afterMonths.setMonth(afterMonths.getMonth() + months)
+    const diff = target - afterMonths
+
     return {
+      months,
       days:  Math.floor(diff / (1000 * 60 * 60 * 24)),
       hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
       mins:  Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
@@ -29,10 +41,11 @@ export default function Countdown() {
   }
 
   const boxes = [
-    { num: time.days,                          unit: 'dias' },
-    { num: String(time.hours).padStart(2, '0'), unit: 'horas' },
-    { num: String(time.mins).padStart(2, '0'),  unit: 'min' },
-    { num: String(time.secs).padStart(2, '0'),  unit: 'seg' },
+    { num: time.months,                          unit: 'meses' },
+    { num: time.days,                            unit: 'dias' },
+    { num: String(time.hours).padStart(2, '0'),  unit: 'horas' },
+    { num: String(time.mins).padStart(2, '0'),   unit: 'min' },
+    { num: String(time.secs).padStart(2, '0'),   unit: 'seg' },
   ]
 
   return (
